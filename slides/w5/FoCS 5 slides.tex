@@ -1,0 +1,467 @@
+\documentclass[handout]{beamer} 
+\title{ITCS 532:\\ 
+5. The Entscheidungsproblem}
+\date{}
+\author{Rob Egrot}
+
+\usepackage{amsmath, bbold, bussproofs,graphicx}
+\usepackage{mathrsfs}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[all]{xy}
+\usepackage{multirow}
+\usepackage{tikz-cd}
+
+
+\newtheorem{proposition}[theorem]{Proposition}
+\newcommand{\bN}{\mathbb{N}}
+\newcommand{\bZ}{\mathbb{Z}}
+\newcommand{\bQ}{\mathbb{Q}}
+\newcommand{\bR}{\mathbb{R}}
+\newcommand{\bP}{\mathbb{P}}
+\newcommand{\tvs}{\textvisiblespace}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\co}{\mathbf{code}}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+\setbeamertemplate{theorems}[numbered]
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{The Entscheidungsproblem}
+\begin{itemize}
+\item We are now in a position to answer the question that we started with.
+\vspace{0.3cm}
+\item That is, Hilbert's Entscheidungsproblem.
+\vspace{0.3cm}
+\item Given a set of first-order sentences $\Gamma$, and another sentence $\phi$, does $\Gamma\models \phi$?
+\vspace{0.3cm}
+\item Is there an algorithm that will always give us the correct answer?
+\vspace{0.3cm}
+\item This was the problem that Turing invented Turing machines to settle.
+\vspace{0.3cm}
+\item The answer turns out to be `no'.
+\vspace{0.3cm}
+\item We will prove this in this class. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{First-Order Logic - Languages}
+\begin{definition}[first-order language]
+\begin{itemize}
+\item A first-order language $\mathscr{L}$ is a union of three disjoint sets $R,F$, and $C$. 
+\item Every element of $R$ and $F$ is associated with a natural number $n\geq 1$ known as its \emph{arity}. 
+\item Symbols in $R$ represent $n$-ary relations. 
+\item Symbols in $F$ represent $n$-ary functions. 
+\item Symbols in $C$ represent constants. 
+\end{itemize}
+\end{definition} 
+\end{frame}
+
+\begin{frame}
+\frametitle{First-Order Logic - Examples}
+\begin{example}[graphs]
+The first-order language of graphs contains a single binary relation symbol $E$. We want $E(x,y)$ to represent the existence of an edge connecting $x$ and $y$.
+\end{example}
+\vspace{1cm}
+\begin{example}[arithmetic]
+We could create a first-order language for arithmetic containing two binary function symbols $+$ and $\times$, and two constant symbols $0$ and $1$. These symbols are intended to have their usual meanings.
+\end{example}
+\end{frame}
+
+\begin{frame}
+\frametitle{First-Order Logic - Logical Symbols}
+\begin{itemize}
+\item To build statements in first-order logic we not only need a first-order language but also a set of logical symbols. 
+\item We will use the following symbols:
+\[\{\forall,\exists,\neg,\vee,\wedge,\ra,=\}\]
+\item This is a maximalist approach, in the sense that we could use a smaller set of symbols if we wanted. 
+\item E.g. $\{\neg,\vee\}$ has the same expressive power as $\{\neg,\vee,\wedge,\ra\}$.
+\item Also, e.g. $\exists$ can be written as $\neg\forall\neg$. 
+\item We also have the brackets $($ and $)$ which we use to arrange our statements so that they can be read unambiguously. 
+\item We also have a countably infinite pool of variables $\{x_0,x_1,x_2,\ldots\}$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{First-Order Logic - Terms and Atomic Formulas}
+We build up statements (which we usually call \emph{formulas}) recursively using the following rules:
+\begin{itemize}
+\item A \emph{term} is any constant $c$ or variable $x$, and everything of form $f(t_1,\ldots,t_n)$ where $f$ is an $n$-ary function symbol and $t_1,\ldots,t_n$ are all terms.
+\vspace{0.5cm}
+\item If $t_1,\ldots,t_n$ are terms and $r$ is an $n$-ary relation symbol then the following are \emph{atomic formulas}:
+\begin{itemize}
+\item $t_1=t_2$,
+\item $r(t_1,\ldots,t_n)$.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{First-Order Logic - Formulas}
+We can now define \emph{formulas} for a given language $\mathscr{L}$:
+\vspace{0.5cm}
+\begin{itemize}
+\item Every atomic formula is a formula.
+\vspace{0.5cm}
+\item If $\phi$ and $\psi$ are formulas and $x$ is a variable then:
+\vspace{0.3cm}
+\begin{itemize}
+\item $\neg \phi$ is a formula.
+\vspace{0.3cm}
+\item $(\phi\vee \psi)$ is a formula.
+\vspace{0.3cm}
+\item $(\phi\wedge \psi)$ is a formula.
+\vspace{0.3cm}
+\item $(\phi\ra \psi)$ is a formula.
+\vspace{0.3cm}
+\item $\forall x\phi$ is a formula.
+\vspace{0.3cm}
+\item $\exists x\phi$ is a formula.
+\end{itemize}
+\end{itemize}
+We may add or omit brackets to make formulas easier to read.
+\end{frame}
+
+\begin{frame}
+\frametitle{First-Order Logic - Free and Bound Variables}
+\begin{itemize}
+\item If an occurrence of a variable $x$ occurs in a formula $\phi$ we say that it is \emph{bound} if it appears in the scope of a quantifier. 
+\item I.e. an occurrence of $x$ in $\phi$ is bound if it appears inside some subformula $\psi$ of $\phi$ and either $\forall x \psi$ or $\exists x \psi$ is also a subformula of $\phi$. 
+\item If an occurrence of $x$ in $\phi$ is not bound then we say it is \emph{free}. 
+\item When a formula contains no free occurrences of variables we say it is a \emph{sentence}. 
+\item In this course we are only interested in first-order sentences. 
+\end{itemize}
+\begin{example}
+Let $\phi=\forall x (r(x,y))\ra (x=y\wedge \forall z(f(z)=x))$. Then $z$ only occurs bound in $\phi$, while $y$ occurs only free. On the other hand $x$ occurs both bound and free.
+\end{example}
+\end{frame}
+
+\begin{frame}
+\frametitle{First-Order Logic - Deduction and Consistency}
+\begin{itemize}
+\item There are various equivalent systems for defining deduction in first-order logic. 
+\item Deduction rules formalize the intuitive idea that some things are logical consequences of others. 
+\item We write $\Gamma\vdash \phi$ if $\phi$ is provable from $\Gamma$. 
+\item We say a set of sentences $\Gamma$ is \emph{inconsistent} if there is $\phi$ such that $\Gamma\vdash \phi$ and $\Gamma\vdash \neg \phi$. 
+\item If there is no such $\phi$ then $\Gamma$ is \emph{consistent}. 
+\item A set of consistent sentences in a language $\mathscr{L}$ is called a \emph{theory} for $\mathscr{L}$. 
+\item We sometimes call the sentences in a theory \emph{axioms}. 
+\item We use theories to specify the kinds of structures we are interested in.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{First-Order Logic - Models and Semantics}
+\begin{itemize}
+\item The goal of first-order logic is to use formal methods to reason about real mathematical systems. 
+\item To do this we need a way to assign meaning to sentences using mathematical structures. 
+\item Given $\mathscr{L}=R\cup F\cup C$ we define a \emph{model} $M$ for $\mathscr{L}$ to be a set $X$ and appropriate relations, functions and elements of $X$. 
+\item Sentences from $\mathscr{L}$ will then be true or false in $M$.
+\item When $\phi$ is true in  $M$ we say $M$ \emph{satisfies} $\phi$ and write $M\models \phi$. 
+\item If for all models $M$ we have $M\models \phi \implies M\models \psi$ then we write $\phi\models \psi$. We say $\psi$ is a \emph{logical consequence} of $\phi$. 
+\item If $\Gamma$ is a set of sentences and $M\models\Gamma\implies M\models \phi$ for all models $M$ of $\mathscr{L}$ then we write $\Gamma\models \phi$. 
+\item If $\Gamma$ is a theory and $M\models \Gamma$ we say $M$ is a model of $\Gamma$. 
+\item If a sentence $\phi$ is true in all models of $\mathscr{L}$ we say it is \emph{valid}, and if it is true in at least one model of $\mathscr{L}$ we say it is \emph{satisfiable}. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{First-Order Logic - Soundness and Completeness}
+\begin{theorem}[soundness]
+If $\Gamma\cup\{\phi\}$ is a set of $\mathscr{L}$-sentences and $\Gamma\vdash \phi$ then $\Gamma\models \phi$.
+\end{theorem}
+\vspace{0.3cm}
+\begin{theorem}[completeness]
+If $\Gamma\cup\{\phi\}$ is a set of $\mathscr{L}$-sentences and $\Gamma\models \phi$ then $\Gamma\vdash \phi$.
+\end{theorem}
+\vspace{0.3cm}
+\begin{corollary}\label{C:cons}
+A first-order theory is consistent if and only if it has a model.
+\end{corollary}
+\vspace{0.3cm}
+\begin{corollary}\label{C:val}
+$\phi$ is valid if and only if $\neg \phi$ is not satisfiable.
+\end{corollary}
+\end{frame}
+
+\begin{frame}
+\frametitle{First-Order Logic - The Peano Axioms} 
+\begin{itemize}
+\item The Peano axioms define the natural numbers and their arithmetic properties in first-order logic. 
+\item The language of Peano arithmetic (PA) is based on the signature $(0,s,+,\times)$. 
+\item Here $0$, $+$ and $\times$ are meant to correspond to their usual roles in arithmetic, and $s$ is meant to be the successor function. 
+\item We don't actually need the functions $+$ and $\times$, as they can be defined using $s$. 
+\item A simple fragment of the first-order theory for Peano arithmetic is defined by the following axioms:
+\begin{enumerate}
+\item $\forall n \neg (0 =s(n))$.
+\item $\forall m\forall n((s(m)=s(n))\ra (m =n))$.
+\end{enumerate}
+\item Call the theory defined by these axioms $S$. 
+\item The full theory PA also has axioms for $+$ and $\times$, and also an infinite set of axioms formalizing the principle of mathematical induction. 
+\item We don't need that here.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{First-Order Logic - Models of $S$} 
+\begin{itemize}
+\item Whenever we have a first-order theory one of the most basic questions we can ask is whether it has a model. 
+\vspace{0.1cm}
+\item In this case, the natural numbers $\mathbb{N}$ with the obvious interpretations of $s$ and $0$ form a model for $S$.
+\vspace{0.1cm}
+\item Are the natural numbers the only model for $S$? 
+\vspace{0.1cm}
+\item No. E.g., take the natural numbers $\mathbb{N}$ and a disjoint copy of the natural numbers $\mathbb{N}'$. 
+\vspace{0.1cm}
+\item Then we can interpret $0$ as zero in $\mathbb{N}$, and we can interpret the successor function naturally in $\mathbb{N}$ and $\mathbb{N}'$ separately (i.e. $s(n)=n+1$ for $n\in \mathbb{N}$ and $s(n')=n'+1$ for $n'\in\mathbb{N}'$). 
+\vspace{0.1cm}
+\item It's easy to check that this is also a model for $S$. 
+\vspace{0.1cm}
+\item We can construct alternative models to the full theory of PA too, though this is technically more difficult.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{First-Order Logic - Intended Models} 
+\begin{itemize}
+\item The fact that there are multiple models for PA reveals a more general phenomenon. 
+\item It is actually very rare for a set of axioms to have only one model. 
+\item This can lead to confusion as there is often an \emph{intended model}, i.e. the model we intend the axioms to describe. 
+\item If there are other models it means that not every property of our intended model has been captured by our axioms. 
+\item Sometimes no recursively enumerable first-order theory has the structure of interest as its only model. 
+\item G\"odel's first incompleteness theorem proves this for arithmetic.
+\item While there are other models for PA other than $\mathbb{N}$, PA is still special in that every model for PA must contain an isomorphic copy of $\mathbb{N}$. 
+\item So we can think of $\mathbb{N}$ as being a kind of minimal model for PA. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{First-Order Logic - Incompleteness} 
+Related to the concept of non-standard models of arithmetic we have G\"odel's famous \emph{incompleteness} theorems:
+\vspace{0.5cm}
+\begin{theorem}[G\"odel's first incompleteness theorem]
+If $\Gamma$ is a consistent and recursively enumerable set of $\mathscr{L}$-sentences such that $\Gamma$ defines a theory powerful enough to do elementary arithmetic, then there is an $\mathscr{L}$-sentence $\phi$ (the G\"odel sentence) such that $\Gamma\not\vdash \phi$ and $\Gamma\not\vdash \neg\phi$.
+\end{theorem}
+\vspace{0.5cm}
+\begin{theorem}[G\"odel's second incompleteness theorem]
+If $\Gamma$ is a consistent and recursively enumerable set of $\mathscr{L}$-sentences such that $\Gamma$ defines a theory powerful enough to do elementary arithmetic, and if $\mathbf{cons}(\Gamma)$ is the $\mathscr{L}$-sentence expressing the consistency of $\Gamma$, then $\Gamma\not\vdash \mathbf{cons}(\Gamma)$.
+\end{theorem}
+\end{frame}
+
+\begin{frame}
+\frametitle{The Entscheidungsproblem Revisited} 
+\begin{itemize}
+\item A decision problem: Given a set of first-order sentences $\Gamma$, and another sentence $\phi$, does $\Gamma\models \phi$?
+\vspace{0.3cm}
+\item Is this decidable?
+\vspace{0.3cm}
+\item No.
+\vspace{0.3cm}
+\item We will see why using Turing machines, reduction, and the Empty Tape Halting Problem.
+\vspace{0.3cm}
+\item We will define a special first-order language for talking about Turing machines.
+\vspace{0.3cm}
+\item Then we will reduce instances of ETHP to instances of the Entscheidungsproblem. 
+\vspace{0.3cm}
+\item It follows that the Entscheidungsproblem is undecidable.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{A Language for Turing Machines - Outline} 
+\begin{itemize}
+\item The idea is to use first-order logic to describe the state of the tape at position $x$ and time $y$ for all $x,y\in\mathbb{N}$. 
+\vspace{0.3cm}
+\item This is kind of like a 2-dimensional grid. The rows of the grid represent the state of the state of the tape at each step in the computation.
+\vspace{0.3cm} 
+\item The symbols in each square, the state of the machine, and the position of the tape head will be represented by predicates. 
+\vspace{0.3cm}
+\item We will use first-order sentences in this language to model the transition function and make sure the grid represents the operation of the Turing machine correctly.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{A Language for Turing Machines - Defining $\mathscr{L}$} 
+Given a Turing machine $T=(Q,\Sigma,q_0,H,\delta)$ with $Q=\{q_0,\ldots,q_m\}$, $\Sigma = \{\sigma_0,\ldots,\sigma_n\}$, and $H = \{q_m\}$ we define a language $\mathscr{L}$ as follows:
+\begin{itemize}
+\item $\mathscr{L}$ contains the following predicates:
+\begin{itemize}
+\item One binary predicate $\sigma$ for every symbol $\sigma\in\Sigma$. The idea is that $\sigma(x,y)$ holds if $\sigma$ is written on the tape at position $x$ at step $y$ of the computation.
+\item A binary predicate $h$. The idea is that $h(x,y)$ holds if the tape head is at position $x$ at step $y$ of the computation.
+\item One unary predicate $q$ for every state $q\in Q$. We will use this to represent the state of the machine. I.e. $q(y)$ holds if the machine is in state $q$ at step $y$ of the computation.
+\end{itemize}
+\item $\mathscr{L}$ contains a single function symbol $s$. The idea is that $s$ is a successor function. I.e. we want $s(x)$ to be $x+1$. We will use this to control how the machine transitions.
+\item $\mathscr{L}$ contains a single constant symbol $0$. This is used to represent the starting point for our grid's number system.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{A Language for Turing Machines - the State of the Tape} 
+With $\sigma_0= :$, and $\sigma_1=\tvs$ we define the following $\mathscr{L}$-sentences to describe the state of the tape: \vspace{0.2cm}
+\begin{itemize}
+\item \small $T_0=\forall x \forall y\big(\bigvee_{i=0}^n \sigma_i(x,y)\big)\wedge \forall x \forall y\big(\bigwedge_{i\neq j}^n (\sigma_i(x,y)\ra\neg \sigma_j(x,y))\big)$.\\
+\normalsize This sentence is supposed to guarantee that at every step of the computation there is one and only one symbol written in every space of the tape (possibly the blank symbol).
+\vspace{0.2cm}
+\item $T_1 = \forall x\forall y\big((\sigma_0(x,y))\leftrightarrow (x=0)\big) $.\\
+This sentence is to make sure that at every step of the computation the symbol $:$ is written in the first square of the tape, and nowhere else.
+\vspace{0.2cm}
+\item $T_2 = \forall x (x\neq 0 \ra\sigma_1(x,0))$.\\
+This is to make sure that at step 0 every square of the tape other than square 0 contains the blank symbol.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{A Language for Turing Machines - Basic Behaviour} 
+We define sentences corresponding to the basic operation of $T$.
+\begin{itemize}
+\item $S_0=q_0(0)$.\\
+This is to ensure that the machine starts in the start state. 
+\item $S_1=\forall y \Big(\big(\bigvee_{i=0}^m q_i(y)\big)\wedge \big(\bigwedge_{i\neq j}^m (q_i(y)\ra \neg q_j(y))\big)\Big)$.\\
+This says that at every step in the computation the machine must be in exactly one state.
+\item $H_0 = h(0,0)$.\\
+This makes sure the tape head starts at square 0.
+\item $H_1 = \forall y\exists x \big(h(x,y)\big) \wedge \forall y \forall x \forall z\big((h(z,y) \wedge h(x,y))\ra (z=x)\big)$.\\
+This says that at every step the tape head is at exactly one place on the tape.
+\item $F=\forall x\forall y\Big(\bigwedge _{i=1}^n \big((\neg h(x,y)\wedge \sigma_i(x,y))\ra \sigma_i(x,s(y))\big)\Big)$.\\
+This says that symbols on the tape can only change when the tape head acts on them.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{A Language for Turing Machines - the Transition Function} 
+Now we deal with the transition function $\delta$.
+\begin{itemize}
+\item For every tuple $t=(q,\sigma,q',\sigma')$ in $\delta$ such that $\sigma'\notin\{\la,\ra\}$ we get a sentence $F_t$ defined by
+\end{itemize}
+\scriptsize
+\begin{equation*}
+F_t=\forall x\forall y\Big(\big(q(y)\wedge h(x,y)\wedge \sigma(x,y)\big)\ra \big(q'(s(y))\wedge \sigma'(x,s(y))\wedge h(x,s(y))\big) \Big).
+\end{equation*}
+\normalsize
+This controls `writing' instructions.
+
+\begin{itemize}
+\item For every tuple $t=(q,\sigma,q',\sigma')$ in $\delta$ such that $\sigma'=\la$ we get a sentence $F_t$ defined by 
+\end{itemize}
+\scriptsize
+\begin{equation*}
+F_t=\forall x\forall y\Big(\big(q(y)\wedge h(x,y)\wedge \sigma(x,y)\big)\ra \big(q'(s(y))\wedge \sigma(x,s(y))\wedge h(p(x),s(y))\big) \Big).
+\end{equation*}
+\normalsize
+This controls `move left' instructions.
+
+\begin{itemize}
+\item For every tuple $t=(q,\sigma,q',\sigma')$ in $\delta$ such that $\sigma'=\ra$ we get a sentence $F_t$ defined by 
+\end{itemize}
+\scriptsize
+\begin{equation*}
+F_t=\forall x\forall y\Big(\big(q(y)\wedge h(x,y)\wedge \sigma(x,y)\big)\ra (q'(s(y))\wedge \sigma(x,s(y))\wedge h(s(x),s(y))\big) \Big).
+\end{equation*}
+\normalsize
+This controls `move right' instructions.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{A Language for Turing Machines - Final Details} 
+Now some final details.\vspace{0.5cm}
+\begin{itemize}
+\item Recall the halting state is $q_m$. We define $\phi = \forall y (\neg q_m(y))$.\\
+This sentence says that the computation does not halt.
+\vspace{0.5cm}
+\item Finally we take a first-order sentence $P$ demanding that our variables follow the selection $S$ of Peano axioms from earlier. I.e.
+\vspace{0.5cm}
+\begin{enumerate}
+\item $\forall n \neg (0 =s(n))$.
+\vspace{0.5cm}
+\item $\forall m\forall n((s(m)=s(n))\ra (m =n))$.
+\end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{The Theorem} 
+\begin{theorem}\label{T:ent}
+There is no algorithm that can take a first-order sentence and decide whether it has a model.
+\end{theorem}
+\textbf{Proof outline}
+\begin{itemize} 
+\item We consider the complement of this problem. 
+\item I.e. yes instances are first-order sentences with no model and no instances are those with a model. 
+\item This is equivalent because a decision problem is decidable if and only if its complement is decidable. 
+\item We prove the complement problem is undecidable by reducing the empty tape halting problem to it. 
+\end{itemize}  
+\end{frame}
+
+\begin{frame}
+\frametitle{The Argument} 
+\begin{itemize} 
+\item Given a Turing machine $M$ let
+\scriptsize
+\end{itemize}
+ \[\phi_M = T_0\wedge T_1\wedge T_2 \wedge S_0\wedge S_1\wedge H_0\wedge H_1\wedge F \wedge \bigwedge_{t\in \delta}F_t\wedge \phi\wedge P\]
+\normalsize
+\begin{itemize}
+\item We can construct $\phi_M$ (in coded form) by checking $\co(M)$. 
+\item We must prove that $M$ halts (on empty input) if and only if $\phi_M$ has no model.
+\item Suppose first that $M$ halts. 
+\item Any model of $\phi_M$ must contain a model of the infinite grid structure we use to represent the state of the tape and TM at every step of the computation. 
+\item This is because $\mathbb{N}$ is a minimal model for $S$.
+\item The state of this $\mathbb{N}\times\mathbb{N}$ grid is completely determined by the code of the machine. 
+\item If $M$ reaches a halt state then we will have $q_m(y)$ for some $y\in\mathbb{N}$. 
+\item But this would contradict $\phi$ and thus $\phi_M$. We conclude that if $M$ halts then $\phi_M$ has no model.
+\end{itemize}  
+
+\end{frame}
+
+\begin{frame}
+\frametitle{The Argument Continued} 
+\begin{itemize} 
+\item Conversely, suppose $M$ does not halt. 
+\vspace{0.5cm}
+\item Then we can represent its run on an $\mathbb{N}\times\mathbb{N}$ grid. 
+\vspace{0.5cm}
+\item Since $M$ does not halt, every row of this grid will be well defined and we will never have $q_m(y)$. 
+\vspace{0.5cm}
+\item This grid is a model for $\phi_M$ using the intended interpretations of the symbols from the language of $\phi_M$.
+\vspace{0.5cm}
+\item So the conversion $M\mapsto \phi_M$ is a reduction, and the complement decision problem, so also the original decision problem, is undecidable.
+\end{itemize}  
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Conclusion} 
+\begin{corollary}
+The Entscheidungsproblem is not decidable.
+\end{corollary} 
+\begin{proof}
+\begin{itemize}
+\item Suppose we have an algorithm for deciding whether $\Gamma\models \phi$ for arbitrary $\Gamma$ and $\phi$. 
+\item We will show we could use this to decide whether an arbitrary sentence $\psi$ has a model, contradicting theorem \ref{T:ent}. 
+\item Now, $\psi$ has no models (i.e. $\psi$ is not satisfiable) if and only if $\neg \psi$ is true in all models (i.e. if $\neg \psi$ is valid), by corollary \ref{C:val}. 
+\item And $\neg\psi$ is valid if and only if $\emptyset\models \neg\psi$, by definition of validity. 
+\item So, assuming we have an algorithm for deciding whether $\Gamma\models \phi$ for arbitrary $\Gamma$ and $\phi$, we can decide if $\neg\psi$ is valid, and thus whether $\psi$ has a model. 
+\item This produces a contradiction, as claimed.
+\end{itemize}
+\end{proof}
+
+\end{frame}
+
+
+
+
+\end{document}

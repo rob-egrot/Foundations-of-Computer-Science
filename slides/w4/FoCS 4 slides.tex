@@ -1,0 +1,502 @@
+\documentclass[handout]{beamer} 
+\title{ITCS 532:\\ 
+4. Undecidable Problems}
+\date{}
+\author{Rob Egrot}
+
+\usepackage{amsmath, bbold, bussproofs,graphicx}
+\usepackage{mathrsfs}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[all]{xy}
+\usepackage{multirow}
+\usepackage{tikz-cd}
+
+
+\newtheorem{proposition}[theorem]{Proposition}
+\newcommand{\bN}{\mathbb{N}}
+\newcommand{\bZ}{\mathbb{Z}}
+\newcommand{\bQ}{\mathbb{Q}}
+\newcommand{\bR}{\mathbb{R}}
+\newcommand{\bP}{\mathbb{P}}
+\newcommand{\tvs}{\textvisiblespace}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\co}{\mathbf{code}}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+\setbeamertemplate{theorems}[numbered]
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{Undecidable Problems}
+\begin{itemize}
+\item In the previous class we saw that there are undecidable problems.
+\vspace{0.1cm}
+\item This was based on a cardinality argument.
+\vspace{0.1cm}
+\item The set of formal languages for a finite alphabet is uncountable.
+\vspace{0.1cm}
+\item But the set of Turing machines for this language is countable.
+\vspace{0.1cm}
+\item Since every recursively enumerable language requires a TM to semidecide it, and no TM semidecides more than one language, there must be languages that are not r.e.
+\vspace{0.1cm}
+\item So there are undecidable problems.
+\vspace{0.1cm}
+\item But can we find an actual undecidable problem?
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{The Halting Problem}
+\begin{itemize}
+\item Given a Turing machine $T$ and an input $I$, either $T(I)$ halts or it runs forever. 
+\vspace{0.2cm}
+\item One must happen, and both cannot be true at the same time. 
+\vspace{0.2cm}
+\item So the question of whether a Turing machine $T$ halts on input $I$ is a \emph{decision problem} whose instances are pairs $(T,I)$. 
+\vspace{0.2cm}
+\item We know that we can encode pairs $(T,I)$ of Turing machines and inputs over the alphabet $\{0,1\}$. 
+\vspace{0.2cm}
+\item So, the question is, can we create a Turing machine that decides this problem? 
+\vspace{0.2cm}
+\item Is there a TM that takes as input $\co(T,I)$ and accepts if $T(I)$ halts, and rejects if it does not (or if its input is not the code for a TM and an input)? 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{If the Halting Problem were decidable...}
+\begin{itemize}
+\item If a Turing machine $H$ exists that can decide the halting problem then, for one thing, it would imply that r.e. languages are recursive. 
+\vspace{1cm}
+\item Why? 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Why is the Halting Problem undecidable}
+\begin{itemize}
+\item How can we prove the Halting Problem is undecidable?
+\vspace{0.2cm}
+\item We will look for a contradiction.
+\vspace{0.2cm}
+\item So suppose $H$ exists. I.e., suppose for any input $J$ we have $H(J)$ accepts if $J=\co(T,I)$ for some Turing machine $T$ and input $I$ such that $T(I)$ halts, and rejects otherwise. 
+\vspace{0.2cm}
+\item What are the consequences of this?  
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Self Reference}
+\begin{itemize}
+\item There are many logical paradoxes arising from `self reference'.  
+\vspace{0.2cm}
+\item E.g. `the set of all sets that don't contain themselves'.
+\vspace{0.2cm}
+\item Can we use this here?
+\vspace{0.2cm}
+\item Consider the machine $H'$ such that $H'(\co(T))$ accepts iff $T(\co(T))$ halts, and rejects otherwise.
+\vspace{0.2cm}
+\item Note that if $H$ exists, then $H'$ also exists, as we can run $H(\co(T,\co(T)))$.
+\vspace{0.2cm}
+\item What happens if we run $H'$ on $\co(H')$?
+\vspace{0.2cm}
+\item $H'$ always halts, so $H'(\co(H'))$ accepts. No problem here. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{A Variation}
+\begin{itemize}
+\item Define a new machine $H''$. 
+\vspace{0.2cm}
+\item This machine is based on $H'$ but it halts if $T(\co(T))$ \emph{doesn't} halt, and it loops forever if $T(\co(T))$ halts. 
+\vspace{0.2cm}
+\item This modification is easy to make; it's like the one used to prove that recursive languages are recursively enumerable. 
+\[H''(\co(T))=\begin{cases}Halt \text{ if } T(\co(T)) \text{ doesn't halt}\\ Loop\text{ }forever \text{ if } T(\co(T)) \text{ halts}\end{cases}\] 
+In addition, $H''(I)$ halts if $I$ is not the coded form of a TM.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Self Reference Again}
+\begin{itemize}
+\item What happens when we run $H''$ on its own code. 
+\item I.e. what is $H''(\co(H''))$? 
+\item According to the definition, $H''(\co(H''))$ halts if and only if $H''(\co(H''))$ doesn't halt. 
+\[H''(\co(H''))=\begin{cases}Halt \text{ if } H''(\co(H'')) \text{ doesn't halt}\\ Loop\text{ }forever \text{ if } H''(\co(H'')) \text{ halts}\end{cases}\] 
+\item This is a clear contradiction, so we must conclude that $H''$ cannot exist. But $H''$ is a simple modification of $H$, so $H$ cannot exist either. This gives us:
+
+\begin{theorem}
+The halting problem is undecidable.
+\end{theorem} 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{The Halting Problem \emph{is} Semidecidable}
+\begin{itemize}
+\item The Halting Problem is semidecidable.
+\vspace{0.4cm}
+\item Why?
+\vspace{0.4cm}
+\item As a consequence, the set of recursive languages is strictly contained in the set of $r.e.$ languages.
+\vspace{0.4cm}
+\item Because the formal language containing strings $\co(T,I)$ (in some alphabet) such that $T(I)$ halts is r.e. but not recursive.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Languages That Are Not R.E.}
+\begin{itemize}
+\item The Halting problem is semidecidable but not decidable, so its associated language is r.e. but not recursive.
+\vspace{0.4cm}
+\item We know from the countable vs uncountable argument that there are languages that are not r.e.
+\vspace{0.4cm}
+\item Can we find an example?
+\vspace{0.4cm}
+\item It turns out the answer is yes.
+\vspace{0.4cm}
+\item First some facts about recursive and r.e. languages.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{}
+\begin{theorem}\label{T:rec}
+If $L$ is a recursive formal language then the complement language $\bar{L}$ is also recursive.
+\end{theorem}
+\begin{proof}
+\begin{itemize}
+\item If $L$ is recursive then there's a Turing machine $T$ that accepts if $I\in L$ and rejects if $I\notin L$. 
+\item To get a machine that decides $\bar{L}$ we just need to swap the `accept' and `reject' states of $T$.
+\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{}
+\begin{theorem}\label{T:comps}
+Let $L$ be a formal language over a finite alphabet. If $L$ is r.e. and the complement language $\bar{L}$ is also r.e. then $L$ is recursive.
+\end{theorem}
+\begin{proof}
+\begin{itemize}
+\item  If there are machines $T_1$ and $T_2$ that semidecide $L$ and $\bar{L}$ respectively then we can construct a machine $T$ to decide $L$ as follows. 
+\item Given input $I$ we simulate $T_1(I)$ and $T_2(I)$. 
+\item Either $I\in L$ or $I\in \bar{L}$ so one of $T_1(I)$ and $T_2(I)$ will halt. 
+\item If $T_1(I)$ halts $T$ accepts, if $T_2(I)$ halts then $T$ rejects. 
+\end{itemize} 
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{}
+\begin{theorem}
+Let $L_1$ and $L_2$ be formal languages over a finite alphabet.
+\begin{enumerate}
+\item If $L_1$ and $L_2$ are recursive then $L_1\cup L_2$ and $L_1\cap L_2$ are recursive.
+\item If $L_1$ and $L_2$ are r.e. then $L_1\cup L_2$ and $L_1\cap L_2$ are r.e.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+\begin{itemize}
+\item Let $T_1$ and $T_2$ be machines that decide $L_1$ and $L_2$ respectively.
+\item Simulating $T_1$ and $T_2$ on any input $I$. 
+\item If either $T_1(I)$ or $T_2(I)$ accepts then $I\in L_1\cup L_2$. On the other hand, if both reject then $I\notin L_1\cup L_2$. 
+\item If both accept then $I\in L_1\cap L_2$, but if one rejects then $I\notin L_1\cap L_2$.
+\item Similarly if $T_1$ and $T_2$ are machines that semidecide $L_1$ and $L_2$ then $I\in L_1\cup L_2$ if and only if either $T_1(I)$ or $T_2(I)$ halts, and $I\in L_1\cap L_2$ if and only if $T_1(I)$ and $T_2(I)$ both halt. 
+\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{Three languages}
+\begin{definition}[$SA$ - `self accepting']
+$SA$ is the language over $\{0,1\}$ that contains the codes of all Turing machines $T$ such that $T(\co(T))$ halts. 
+\end{definition}
+\vspace{0.4cm}
+\begin{definition}[$NSA$ - `not self accepting']
+$NSA$ is the language over $\{0,1\}$ that contains the codes of all Turing machines $T$ such that $T(\co(T))$ does not halt.
+\end{definition}
+\vspace{0.4cm}
+\begin{definition}[$NSA'$]
+$NSA'$ is $NSA$ together with all the strings that are not codes for Turing machines. So $NSA'=\overline{SA}$.
+\end{definition}
+\end{frame}
+
+\begin{frame}
+\frametitle{The Halting Problem and $SA$}
+\begin{itemize}
+\item $SA$ contains all the yes instances of the modified Halting Problem from earlier.
+\item We showed there is no TM that decides this problem.
+\item So $SA$ is not recursive (but is r.e. as we can design a machine to semidecide it).
+\item So...
+\end{itemize}
+
+\begin{theorem}
+$NSA'$ is not r.e.
+\end{theorem}
+\begin{proof}
+Since $SA$ is r.e., if $NSA'$ is also r.e. then $SA$ is recursive by theorem \ref{T:comps} (as $NSA'=\overline{SA}$). But $SA$ is not recursive, so $NSA'$ cannot be r.e.
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{Application to $NSA$}
+\begin{corollary}
+$NSA$ is not r.e.
+\end{corollary}
+\begin{proof}
+\begin{itemize}
+\item By the definition of coding there is an algorithm that says whether a string $x$ is or is not the coded form of a Turing machine. 
+\item So if $NSA$ was r.e. then we could combine this with the algorithm semideciding $NSA$:
+\begin{enumerate}
+\item Check if input string $x$ is the code of a Turing machine. If no then halt, if yes go to step 2.
+\item Run algorithm semideciding $NSA$. If this halts then halt, otherwise just keep going. 
+\end{enumerate} 
+\item This algorithm semidecides $NSA'$, which is a contradiction because we know $NSA'$ is not r.e.
+\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{A Direct Argument for $NSA$}
+We could also prove that $NSA$ is not r.e. directly, using similar logic to what we used to show the halting problem is not decidable.
+\vspace{0.4cm}
+\begin{theorem}\label{T:NSAalt}
+$NSA$ is not r.e. (without using the fact that the modified halting problem is undecidable).
+\end{theorem}
+\begin{proof}
+\begin{itemize}
+\item Suppose there is a machine $M$ that semidecides $NSA$. 
+\item So $M(\co(T))$ halts if $T(\co(T))$ does not halt, and runs forever if $T(\co(T))$ halts. 
+\item So by definition $M(\co(M))$ halts if and only if $M(\co(M))$ does not halt, which is a contradiction.
+\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{Another Argument for $NSA'$}
+\begin{corollary}\label{C:NSA'}
+$NSA'$ is not r.e.
+\end{corollary}
+\begin{proof}
+If $NSA'$ were r.e. then we could use the following algorithm on input string $x$:
+\begin{enumerate}
+\item Run the algorithm that semidecides $NSA'$. If this halts then go to the next step.
+\item \begin{itemize}
+\item Run the algorithm that decides if $x$ is the code of a Turing machine. 
+\item If $x$ is the code of a Turing machine then it must not be self-accepting, as it's in $NSA'$. 
+\item This means it's in $NSA$, so we should halt. 
+\item If $x$ is not the code of a Turing machine then we should instead go into an infinite loop. 
+\end{itemize}  
+\end{enumerate}
+This algorithm semidecides $NSA$, which would contradict the fact that $NSA$ is not r.e. 
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{Another Argument for $SA$}
+We can also use previously proved results to show that $SA$ is not recursive without referencing the halting problem.
+\vspace{0.4cm}
+\begin{theorem}
+$SA$ is not recursive.
+\end{theorem}
+\begin{proof}
+\vspace{0.4cm}
+If $SA$ is recursive then $\overline{SA}=NSA'$ is recursive by theorem \ref{T:rec}. This would contradict corollary \ref{C:NSA'}.
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{Back to the Halting Problem}
+\begin{itemize}
+\item We have found two conceptually straightforward languages, one of which is recursive but not r.e. ($SA$), and the other which is not even r.e. ($NSA$). 
+\vspace{0.1cm}
+\item The arguments are perhaps easier to understand than the somewhat complicated definition of $H''$ used in the proof that the Halting problem is not recursive. 
+\vspace{0.1cm}
+\item In particular the proof that $NSA$ is not r.e. from theorem \ref{T:NSAalt} uses self-reference to get a contradiction in a much more direct way than the proof that the Halting problem is undecidable does. 
+\vspace{0.1cm}
+\item However, the Halting problem is independently interesting, and historically important, which is why we discuss it in some detail.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{The Empty Tape Halting Problem}
+\begin{itemize}
+\item We know that the halting problem is undecidable. 
+\vspace{0.2cm}
+\item That is, there is no Turing machine $H$ that can act on $\co(T,I)$ for another Turing machine $T$ and accept if $T(I)$ halts and reject if it does not.
+\vspace{0.2cm} 
+\item Consider the following decision problem.
+\end{itemize}
+\begin{definition}[empty tape halting problem]
+Is there a Turing machine $E$ that given $\co(T)$ for another Turing machine $T$ will accept if $T$ halts on the empty string and will reject otherwise?
+\end{definition}
+\end{frame}
+
+\begin{frame}
+\frametitle{Solving the Empty Tape Halting Problem}
+\begin{itemize}
+\item Suppose this machine $E$ exists. 
+\item Consider a Turing machine $T$ and an input $I$. 
+\item Using $T$ and $I$ we design a new Turing machine $T_I$ that does the following on input $J$.
+\begin{enumerate}
+\item $T_I$ erases input $J$ from the tape.
+\item $T_I$ simulates $T$ on $I$.
+\end{enumerate}
+
+\item What happens if we run $E$ on $\co(T_I)$?
+\end{itemize}
+\vspace{0.2cm}
+\scriptsize
+\[\text{$E(\co(T_I))$ accepts $\iff T_I$ halts on empty input $\iff T(I)$ halts.}\]
+\[\text{$E(\co(T_I))$ rejects $\iff T_I$ does not halt on empty input $\iff T(I)$ does not halt.}\]
+\normalsize
+\begin{itemize}
+\item This looks a lot like solving the halting problem, which we know is impossible. 
+\item This can't happen so we will conclude that $E$ should not exist.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Formal Version}
+\begin{itemize}
+\item We want to formalize the argument we just made to show $E$ can't exist.
+\item First, assume $E$ solving the ETHP exists.
+\item Construct a TM $H$ as follows:
+\end{itemize}
+\begin{enumerate}
+\item Given input $\co(T,I)$ the first thing $H$ does is construct $\co(T_I)$. This is complicated but it can be done.
+\item $H$ then simulates $E(\co(T_I))$.
+\item  $H(\co(T,I))$ accepts $\iff E(\co(T_I))$ accepts $\iff T(I)$ halts, and rejects otherwise. 
+\end{enumerate}
+\begin{itemize}
+\item $H$ is a well defined Turing machine, and $H$ solves the halting problem. 
+\item The only questionable step in the construction of $H$ is the assumption that $E$ exists. 
+\item Since $H$ cannot exist we conclude that $E$ cannot exist either, and so the empty tape halting problem is also undecidable.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Reduction}
+This is an example of a general technique called \emph{reduction}. The general strategy is as follows.
+
+\begin{enumerate}
+\item Start with a decision problem $D$ whose decidability is not known, and a decision problem $U$ that is known to be undecidable (e.g. the halting problem).
+\item Show that instances $I_U$ of $U$ can be converted by an algorithm to instances $I_D$ of $D$ so that
+\begin{itemize}
+\item $I_D$ is a yes instance of $D\iff I_U$ is a yes instance of $U$.
+\item $I_D$ is a no instance of $D\iff I_U$ is a no instance of $U$.
+\end{itemize}
+\item If there is an algorithm for solving $D$ then we could combine this with our instance converting algorithm to find an algorithm for solving $U$.
+\item Since $U$ is undecidable no algorithm for solving $U$ exists, and we conclude that an algorithm for solving $D$ cannot exist either.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Ordering by Hardness}
+
+\begin{definition}[reducible]
+\emph{$A$ is reducible to $B$} if there is an algorithm that converts instances $I_A$ of $A$ to instances $I_B$ of $B$ so that $I_B$ is a yes instance of $B$ if and only if $I_A$ is a yes instance of $A$, and $I_B$ is a no instance of $B$ if and only if $I_A$ is a no instance of $A$.\end{definition}
+
+\begin{definition}[$A\leq B$]
+Given decision problems $A$ and $B$ we write $A\leq B$ if $A$ is reducible to $B$. 
+\end{definition} 
+\begin{itemize}
+\item Informally we think of this as meaning that $B$ is at least as hard as $A$. 
+\item I.e. if we had a solution for $B$ we could use it to solve $A$, but we wouldn't necessarily be able to use a solution for $A$ to solve $B$. 
+\item With $U$ and $D$ from the previous slide we would write $U\leq D$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{A Hierarchy of Decision Problems}
+\begin{itemize}
+\item This produces a kind of hierarchy of problems (and formal languages), ordered by their relative decidability. 
+\item It turns out that all the decidable problems are grouped together at the bottom of this hierarchy. 
+\end{itemize}
+\begin{theorem}
+Let $D$ be a decidable problem, and let $A$ be any other decision problem with at least one yes instance and at least one no instance. Then $D\leq A$.
+\end{theorem}
+\begin{proof}
+\begin{itemize}
+\item Since $D$ is decidable, given an instance $I_D$ of $D$ we can find out whether it is `yes' or `no' by running the decision algorithm for $D$. 
+\item If $I_D$ is a `yes' we convert it to a `yes' of $A$, and if not we convert it to a `no' of $A$. 
+\item So $D\leq A$.
+\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{Basic Properties of $\leq$}
+\begin{itemize}
+\item The $\leq$ relation for decision problems is reflexive (i.e. $A\leq A$), and transitive (i.e. $A\leq B$ and $B\leq C\implies A\leq C$).
+\vspace{0.4cm}
+\item Why?
+\vspace{0.4cm}
+\item  $\leq$ is not symmetric.
+\vspace{0.4cm}
+\item Why?
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Halts for all Inputs ($HAI$)}
+\begin{itemize}
+\item Suppose we have the code of a Turing machine $T$. 
+\vspace{0.4cm}
+\item Is there an algorithm that we can run on $\co(T)$ that tells us whether or not $T(I)$ halts for all inputs $I$? 
+\vspace{0.4cm}
+\item The answer is no, and one of the exercises for this section is to prove this by reducing the Halting problem to this problem.
+\vspace{0.4cm}
+\item I.e. to show that $HP\leq HAI$.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Equivalence of Turing machines ($ETM$)}
+\begin{itemize}
+\item Suppose we have the code for two Turing machines. 
+\vspace{0.4cm}
+\item Is there an algorithm we can use that will tell us if they do the same thing for all inputs (i.e. if $T_1(I)=T_2(I)$ for all $I$)? 
+\vspace{0.4cm}
+\item It turns out the answer is no, and we can prove this using the reduction technique.
+\vspace{0.4cm}
+\item We will show that $HAI\leq ETM$.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$HAI\leq ETM$}
+\begin{itemize}
+\item An instance of $HAI$ is just a Turing machine $T$, and $T$ is a yes instance if and only if $T(I)$ halts for all $I$. 
+\item We want to use $T$ to construct $T_1$ and $T_2$ so that $T(I)$ halts for all $I$ if and only if $T_1(I)=T_2(I)$ for all $I$. 
+\item We construct $T_1$ so that it operates as follows:
+\begin{enumerate}
+\item $T_1(I)$ simulates $T(I)$.
+\item If $T(I)$ halts then $T_1(I)$ erases the tape then writes a single `1' before halting. 
+\end{enumerate} 
+\item We construct $T_2$ so that $T_2(I)$ just writes a single `1' on the tape before halting for all $I$.
+\item $T$ is a yes instance of $HAI$ if and only if $T(I)$ halts for all $I$. 
+\item This happens if and only if $T_1(I)$ writes a single `1' for all $I$. 
+\item But $T_1(I)=1$ for all $I$ if and only if $T_1(I)=T_2(I)$ for all $I$. 
+\item So $T$ is a `yes' instance of $HAI$ if and only if $(T_1,T_2)$ is a yes instance of $ETM$. 
+\item So $HAI\leq ETM$ and so $ETM$ is undecidable.
+\end{itemize} 
+\end{frame}
+
+
+
+\end{document}

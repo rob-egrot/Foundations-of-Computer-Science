@@ -1,0 +1,514 @@
+\documentclass[handout]{beamer} 
+\title{ITCS 532:\\ 
+8. $\mathbf{NP}$-completeness}
+\date{}
+\author{Rob Egrot}
+
+\usepackage{amsmath, bbold, bussproofs,graphicx}
+\usepackage{mathrsfs}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[all]{xy}
+\usepackage{multirow}
+\usepackage{tikz-cd}
+
+\newtheorem{exercise}[theorem]{Exercise}{\bfseries}{\upshape}
+
+
+\newtheorem{proposition}[theorem]{Proposition}
+\newcommand{\bN}{\mathbb{N}}
+\newcommand{\bZ}{\mathbb{Z}}
+\newcommand{\bQ}{\mathbb{Q}}
+\newcommand{\bR}{\mathbb{R}}
+\newcommand{\bP}{\mathbb{P}}
+\newcommand{\tvs}{\textvisiblespace}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\co}{\mathbf{code}}
+
+\newcommand{\Po}{\mathbf{P}}
+\newcommand{\NP}{\mathbf{NP}}
+\newcommand{\SAT}{\mathsf{PSAT}}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+\setbeamertemplate{theorems}[numbered]
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Verifiers}
+\begin{definition}[Verifier]
+Given a language $L$ over a finite alphabet $\Sigma$, a verifier for $L$ is a modified Turing machine $V$, where $V$ takes two inputs instead of one (consider the inputs to be separated by a special symbol), and such that
+\[x\in L\iff \text{ there is } y\in\Sigma^* \text{ such that } V(x,y) \text{ accepts}\] 
+\end{definition}
+\begin{itemize}
+\item Here $y$ is called a \emph{certificate} for $x$. 
+\item A verifier must halt for all inputs. 
+\item We say a verifier for $L$ runs in $p$-time if it runs in $p$-time with respect to the length of $x$ for all inputs $(x,y)$. 
+\item The certificate is like a proposed solution. 
+\item The verifier accepts $x$, which encodes an instance of a decision problem, if and only if there's some proposed solution $y$ that it can check is actually a solution. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Example}
+\begin{example}[Hamiltonian circuits]
+\begin{itemize}
+\item An instance of the Hamiltonian circuit problem is a graph $G$. 
+\item A certificate for $G$ is just a sequence $s$ of vertices (in coded form). 
+\item A verifier $V$ for the Hamiltonian  circuit problem would accept on input $(\co(G),\co(s))$ if and only if $s$ defines a Hamiltonian circuit in $G$.
+\end{itemize} 
+\end{example}
+\vspace{0.5cm}
+\begin{theorem}
+A language has a verifier if and only if it is recursively enumerable.
+\end{theorem}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{The Class $\NP$}
+\begin{definition}
+$\NP$ is the class of all decision problems that have a $p$-time verifier.
+\end{definition}
+\vspace{1cm}
+\begin{itemize}   
+\item Note that $\NP$ does \emph{not} stand for \emph{non-polynomial}. 
+\vspace{1cm}
+\item $\NP$ actually stands for \emph{non-deterministic polynomial}. 
+\vspace{1cm}
+\item The name comes from an alternative definition of the class $\NP$, which we will see now.
+\end{itemize} 
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Non-deterministic Turing machines}
+\begin{itemize}
+\item A non-deterministic Turing machine ($NTM$) is a Turing machine variant whose transition function $\delta$ has the form:
+\[\delta:Q\times\Sigma\cup\{:,\tvs\}\to\wp\Big(Q\times \big(\Sigma\cup\{\tvs,\la,\ra\}\big)\Big)\]
+\item That is, $\delta$ is now a function that takes as input the state of the machine and the symbol being read by the tape head, and returns a \emph{set} of pairs of new states and tape head actions. 
+\item Obviously it doesn't make sense for a machine to enter a set of states, or write a set of symbols on the tape.
+\item We interpret the output of $\delta$ as a \emph{choice}. 
+\item In a run of an NTM, at every step the machine picks one pair of states and tape head actions from the set of possibilities defined by $\delta$. 
+\item This is why these machines are called non-deterministic.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Non-deterministic Turing machines}
+\begin{itemize}
+\item For example, suppose the NTM is in state $q$ and reading symbol $\sigma$, and that $\delta(q,\sigma)=\{(q_1,\sigma_1),(q_2,\sigma_2)\}$. 
+\item Then the machine can either go into state $q_1$ and write $\sigma_1$ on the tape, or go into state $q_2$ and write $\sigma_2$ on the tape.  
+
+\item Given an input $I$ and a non-deterministic Turing machine $N$, we say $N(I)$ \emph{accepts} if there is some sequence of $\delta$ choices resulting in the accept state. 
+\item We say $N(I)$ \emph{rejects} if every possible sequence of $\delta$ choices results in rejection. 
+\item If neither of these is true then $N(I)$ is undefined. 
+\item A sequence of $\delta$ choices for $N(I)$ that either reaches a halt state or continues forever is called a \emph{run} of $N(I)$. 
+\item If every possible run of $N(I)$ halts for all possible inputs $I$ then we say $N$ is a \emph{decider}.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{The Run Time of an NTM}
+\begin{itemize}
+\item It's not obvious how the run time of an NTM should be defined in general, but for deciders we do so as follows:
+\begin{itemize} 
+\item For an input $I$ the run time of $N(I)$ is defined to be the length of the longest possible run of $N(I)$. 
+\item We define the run time of $N$ as a function $f:\mathbb{N}\to \mathbb{N}$ by 
+\[f(n)=\max\{ \text{run time of }N(I) \text{ such that length }I \text{ is }n\}\]
+\item As usual we use big $O$ notation so we can talk about $f$ without having to explicitly define it.
+\end{itemize}
+\item Note that in this definition of run time we use the longest run, even if there's a shorter run that accepts. 
+\item For example, if for some $N$ and some $I$ there are exactly two runs, one which accepts after 2 steps and one which rejects after 10 steps, then the run time of $N(I)$ is 10. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Determinism vs Non-Determinism}
+The following theorem says NTMs are not more powerful than TMs (if we don't care about run time).
+
+\begin{theorem}
+Let $L$ be a formal language over a finite alphabet. Then $D_L$ (the decision problem associated with $L$) is solvable by a Turing machine if and only if it is solvable by a non-deterministic Turing machine. 
+\end{theorem}
+\begin{proof}
+\begin{itemize}
+\item Clearly every ordinary (i.e. deterministic) Turing machine $T$ is equivalent to a non-deterministic Turing machine $T'$.
+\item  Just define $\delta'$ by e.g. setting $\delta'(q,\sigma)=\{(q',\sigma')\}$ when $\delta(q,\sigma)=(q',\sigma')$.
+\item The converse is more difficult, but the basic idea is that we can use dovetailing to compute every possible run of an $NTM$ using a specially designed standard $TM$.
+\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{NTMs and Verifiers}
+\begin{theorem}\label{T:NP}
+Let $L$ be a formal language over a finite alphabet. Then $L$ has a $p$-time verifier if and only if $L$ can be decided by a non-deterministic Turing machine in $p$-time.
+\end{theorem}
+\vspace{0.5cm}
+\textbf{Proof}
+\vspace{0.5cm}
+\begin{itemize}
+\item If $L$ is a language, we must show that:
+\vspace{0.5cm}
+\begin{enumerate}
+\item If $L$ has a $p$-time verifier $V$, then we can construct an NTM $N_V$ that decides $L$ in $p$-time.
+\vspace{0.5cm}
+\item If there is an NTM $N$ that decides $L$ in $p$-time, then we can construct a $p$-time verifier $V_N$ for $L$.
+\end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Has Verifier Implies Decided by NTM}
+\begin{itemize}
+\item Let $V$ be a $p$-time verifier for $L$. 
+\item $V$ runs in $p$-time, so there is $n\in\bN$ such that $V(x,y)$ must halt within $C|x|^k$ steps whenever $|x|\geq n$. 
+\item The idea is that we define a non-deterministic Turing machine $N_V$ that, given $x$, first constructs a string $y$ and then runs $V(x,y)$. 
+\item Implementing this idea is a little tricky, as there are some details we need to be careful with. 
+\item First, note that there are a finite number of strings whose length is less than $n$. 
+\item For each $x\in L$ with $|x|<n$, define $y_x$ to be a string of minimal length such that $V(x,y_x)$ accepts. 
+\item Since there are a finite number of these $y_x$ elements, define $l$ to be the length of the longest of these. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Has Verifier Implies Decided by NTM}
+\begin{itemize}
+\item We define $N_V$ so that a `run' of $N_V(x)$ is as follows:
+\begin{enumerate}
+\item Check the length of $x$.
+\item If $|x|\geq n$ then non-deterministically construct $y$ so that $|y|\leq C|x|^k$. Otherwise non-deterministically construct $y$ such that $|y|\leq l$.
+\item Run $V(x,y)$ (this part is deterministic).
+\end{enumerate}
+\item Consider first the case where $|x|\geq n$. 
+\item If $x\in L$ then there is a certificate $y$ such that $V(x,y)$ accepts within $C|x|^k$ steps. 
+\item The upper bound on the number of steps means that $|y|\leq C|x|^k$ too. 
+\item This means there is an accepting run for $N_V(x)$. 
+\item Alternatively, if $x\notin L$ then $V(x,y)$ rejects for all $y$, and this is obviously still true if we restrict to $y$ where $|y|\leq C|x|^k$. 
+\item Constructing $y$ takes $p$-time, and running $V(x,y)$ takes $p$-time. 
+\item So the longest possible run of $N_V(x)$ is also $p$-time.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Has Verifier Implies Decided by NTM}
+\begin{itemize}
+\item Consider now the case where $|x|<n$. 
+\item Suppose $x\in L$. 
+\item Then there is $y_x$ with $|y_x|\leq l$ and such that $V(x,y_x)$ accepts, so $N_V(x)$ accepts. 
+\item Alternatively, if $x\notin L$ then there is no $y$ such that $V(x,y)$ accepts, so $N_V(x)$ rejects. 
+\item Combining this with the case where $|x|\geq n$ we see that $N_V$ decides $L$. 
+\item What is the running time of $N_V$?  
+\item We don't care about the running time of $N_V(x)$ in the case where $|x|< n$. 
+\item We have also shown that, for all $x$ with $|x|\geq n$, a run of $N_V(x)$ is polynomially bounded. 
+\item Thus $N_V$ runs in $p$-time as required.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Decided by NTM Implies Has Verifier}
+\begin{itemize}
+\item Given $N$ that decides $L$ in $p$-time we define a verifier $V_N$ where a string $y$ that is a potential certificate encodes a sequence $n_0,n_1,\ldots,n_k$ of natural numbers. 
+\vspace{0.5cm}
+\item Every time $N$ `makes a choice', we can assign an ordering of the possible alternatives. 
+\vspace{0.5cm}
+\item For example, if \[\delta:(q,\sigma)\mapsto \{(q_0,\sigma_0), (q_1,\sigma_1), (q_2,\sigma_2)\}\] 
+we can arbitrarily choose an order and assume without loss of generality that $\{(q_0,\sigma_0), (q_1,\sigma_1), (q_2,\sigma_2)\}$ is the ordered sequence $((q_0,\sigma_0), (q_1,\sigma_1), (q_2,\sigma_2))$. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Decided by NTM Implies Has Verifier}
+\begin{itemize}
+\item We define $V_N$ so that $V_N(x,y)$ operates by computing $N(x)$, and such that the `choices' made by $N$ correspond to the numbers in the sequence $n_0,n_1,\ldots,n_k$ defined by $y$. 
+\vspace{0.5cm}
+\item If $y$ does not correspond to such a sequence, or if this sequence is incompatible with $N(x)$ in any way, then we define $V_N$ so that $V_N(x,y)$ rejects. 
+\vspace{0.5cm}
+\item If there is an accepting run of $N(x)$ then this will correspond to a sequence of `correct' choices, and thus to a $y$ such that $V_N(x,y)$ accepts. 
+\vspace{0.5cm}
+\item Alternatively, if there is no accepting run then $V_N(x,y)$ will reject for all $y$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Decided by NTM Implies Has Verifier}
+\begin{itemize}
+\item As $N$ runs in $p$-time there are $C,m,k\in \bN$ such that $N(x)$ takes at most $C|x|^k$ steps whenever $|x|\geq m$. 
+\vspace{0.5cm}
+\item Thus $N$ makes at most $C|x|^k$ choices when computing $N(x)$. 
+\vspace{0.5cm}
+\item Assuming we have picked a sensible encoding scheme, it will be possible to look up the numbers of the choices appropriately in $p$-time and act accordingly. 
+\vspace{0.5cm}
+\item Thus $V_N$ runs in $p$-time as required.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Revisiting $\NP$}
+\begin{corollary}
+$\NP$ is the class of all decision problems that can be solved by a non-deterministic Turing machine in $p$-time.
+\end{corollary}
+\begin{proof}
+\begin{itemize}
+
+\item Remember that we defined $\NP$ to be the class of decision problems for which a $p$-time verifier exists. 
+\item By theorem \ref{T:NP} this is exactly the class of problems solvable in $p$-time by an NTM.
+\end{itemize}
+\end{proof} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$\Po$ vs $\NP$}
+\begin{itemize}
+\item Question: Why is it obvious that $\Po\subseteq \NP$?
+\item Is it possible that $\Po=\NP$? 
+\item This is possibly the most important open question in theoretical computer science. 
+\item The Clay Mathematics Institute lists it as one of their seven `Millennium Problems'. 
+\item The $\Po$ vs. $\NP$ question symbolizes something of profound practical significance: 
+\item Is it intrinsically harder to find solutions than to verify them? 
+\item If the answer to this is `no', i.e. if $\Po=\NP$, then there could be efficient algorithms for solving all kinds of currently hard problems (including those used in encryption systems).
+\item Most computer scientists believe that $\Po\neq\NP$. 
+\item This has turned out to be very hard to prove. 
+\item But there are lots of $\NP$ problems that nobody has ever found a $p$-time algorithm for.  
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$\NP$-hardness}
+\begin{definition}[$\NP$-hard]
+A decision problem $B$ is $\NP$-hard if for all decision problems $A\in \NP$ we have $A\leq_p B$. 
+\end{definition}
+\begin{itemize}
+\item Consider the definition above and think about what it means. 
+\item A problem is $\NP$-hard if every problem in $\NP$ reduces to it in polynomial time. 
+\item Informally, we interpret this as meaning an $\NP$-hard problem is at least as hard as the hardest problems in $\NP$. 
+\item If we could find a $p$-time algorithm for solving an $\NP$-hard problem then we would be able to find $p$-time algorithms for all $\NP$ problems. 
+\item In other words it would show that $\Po=\NP$.  
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$\NP$-completeness}
+\begin{itemize}
+\item It's not immediately obvious that $\NP$-hard problems exist.
+\vspace{0.5cm}
+\item But, as we will see shortly, they do, and, moreover, there are even $\NP$-hard problems that are also members of $\NP$. 
+\vspace{0.5cm}
+\item This leads us to the following definition.  
+\end{itemize} 
+\vspace{0.5cm}
+\begin{definition}[$\NP$-complete]
+A decision problem is $\NP$-complete if it is $\NP$-hard and also a member of $\NP$.
+\end{definition} 
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$\NP$-completeness}
+\begin{itemize}
+\item We will give an example of an $\NP$-complete problem soon. 
+\item Once we have one $\NP$-complete problem, however, it becomes much easier to find more, due to the following theorem.  
+\end{itemize} 
+\begin{theorem}\label{T:ctrans}
+If $B$ is $\NP$-complete and $C\in\NP$, then $B\leq_p C\implies C$ is $\NP$-complete.
+\end{theorem}
+\begin{proof}
+\begin{itemize}
+\item Let $A\in \NP$. 
+\item We need to show that $A\leq_p C$. 
+\item But we know $A\leq_p B$ as $B$ is $\NP$-complete, and $B\leq_p C$ by assumption, so this follows from transitivity of $\leq_p$.
+\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{$\SAT$}
+\begin{itemize}
+\item To define our first $\NP$-complete problem we need some preliminary definitions from propositional logic.
+\end{itemize} 
+\begin{definition}[Boolean formula]
+A Boolean formula is a finite string of propositional variables, brackets, and logical symbols from $\{\vee,\wedge,\neg\}$ constructed according to the following rules:
+\begin{enumerate}
+\item $p$ is a Boolean formula for all propositional variables $p$.
+\item If $\phi$ and $\psi$ are Boolean formulas then $(\phi\vee\psi)$ and $(\phi\wedge\psi)$ are Boolean formulas.
+\item If $\phi$ is a Boolean formula then $\neg\phi$ is a Boolean formula.
+\end{enumerate} 
+\end{definition}
+\end{frame}
+
+\begin{frame}
+\frametitle{$\SAT$}
+
+\begin{definition}[Satisfiable]
+A Boolean formula $\phi$ is satisfiable if there is an assignment of 1 or 0 (`true' or `false') to every propositional variable appearing in $\phi$ such that $\phi$ is `true' in the resulting truth table.
+\end{definition}
+\vspace{1cm}
+\begin{definition}[$\SAT$]
+$\SAT$ is the decision problem that asks if a given Boolean formula is satisfiable.
+\end{definition}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{$\SAT$ is $\NP$-complete}
+
+\begin{theorem}
+$\SAT$ is $\NP$-complete.
+\end{theorem}
+\textbf{Proof sketch}
+\begin{itemize}
+\item We will sketch a proof without going too far into the details. 
+\item First we must check that $\SAT$ is in $\NP$.
+\item By definition, a problem is in $\NP$ if it has a $p$-time verifier. 
+\item We can check if a given Boolean formula evaluates to `true' when given a specific variable assignment in $p$-time. 
+\item To do this we can rewrite a Boolean formula into something called \emph{reverse Polish notation} using the \emph{shunting yard algorithm}. 
+\item In reverse Polish notation we can evaluate expressions just by reading them from left to right, which takes linear time. 
+\item Since the shunting yard algorithm runs in linear time too, we can evaluate Boolean formulas for specific values of their propositions in linear time.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$\SAT$ is $\NP$-complete}
+\begin{itemize}
+\item Now we must show every problem in $\NP$ reduces to $\SAT$.
+\vspace{0.2cm}
+\item Let $A$ be a decision problem in $\NP$. 
+\vspace{0.2cm}
+\item We know there's an NTM that decides $A$ in $p$-time. 
+\vspace{0.2cm}
+\item We must find a $p$-time algorithm that takes an instance $I$ of $A$ and turns it into a Boolean formula that is satisfiable if and only if $I$ is a `yes' instance. 
+\vspace{0.2cm}
+\item Since all we know about $A$ is that it is in $\NP$ we're going to have to use the NTM that decides $A$ in our reduction. 
+\vspace{0.2cm}
+\item Let $N$ be an NTM that decides $A$. 
+\vspace{0.2cm}
+\item The idea is that we will create a Boolean formula that expresses the idea that $N(I)$ has an accepting run. 
+\vspace{0.2cm}
+\item This formula will be satisfiable if and only if an accepting run exists. I.e. if and only if $I$ is a `yes' instance.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$\SAT$ is $\NP$-complete}
+\begin{itemize}
+\item This idea is quite similar to how we showed the entscheidungsproblem is undecidable. 
+\vspace{0.3cm}
+\item This time we don't have the expressive power of first-order logic to work with. 
+\vspace{0.3cm}
+\item For the entscheidungsproblem proof we used predicates to describe the state of the tape at each step in the computation. 
+\vspace{0.3cm}
+\item In propositional logic we don't have predicates, so we have to use propositional variables for the same purpose. 
+\vspace{0.3cm}
+\item But our formula can only use a finite number of propositional variables.
+\vspace{0.3cm} 
+\item This is where the bounded running time of $N$ helps us.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$\SAT$ is $\NP$-complete}
+\begin{itemize}
+\item As in the entscheidungsproblem proof, we think of a run of a TM as a two dimensional grid. 
+\vspace{0.3cm}
+\item The rows of the grid represent the tape at successive steps of the calculation. 
+\vspace{0.3cm}
+\item Since $N$ is non-deterministic, $N(I)$ is associated with multiple different runs, and so with multiple different grids. 
+\vspace{0.3cm}
+\item Since $N$ runs in $p$-time, we can suppose that for large $n$ its run time on an input of length $n$ is less than $Cn^k$. 
+\vspace{0.3cm}
+\item Suppose the length of $I$ is $n$. Then this means that every grid associated with a run of $N(I)$ must fit into $Cn^k\times Cn^k$. 
+\vspace{0.3cm}
+\item Cells outside of this range are inaccessible to a machine halting in fewer than $Cn^k$ steps, so we can ignore them.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$\SAT$ is $\NP$-complete}
+\begin{itemize}
+\item Let $Q$ be the set of states of $N$, and let $\Sigma$ be its (finite) set of symbols. 
+\vspace{0.3cm}
+\item Our Boolean formula $\phi$ will use the following set of propositional variables:  
+\vspace{0.3cm}
+\begin{itemize}
+\item For every $i,j\leq Cn^k$ and every $\sigma\in \Sigma\cup\{:,\tvs\}$ we have $p_{i,j,\sigma}$. This variable is supposed to be `true' if $\sigma$ is written on the tape at position $i$ and time $j$.  
+\vspace{0.3cm}
+\item For every $i,j\leq Cn^k$ and every $q\in Q$ we have $p_{i,j,q}$. This variable is supposed to be `true' if the machine is in state $q$ and the tape head is at position $i$ at time $j$.
+\end{itemize}
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$\SAT$ is $\NP$-complete}
+\begin{itemize}
+\item The idea is that $\phi$ will express the following:
+\end{itemize} 
+\begin{enumerate}
+\item Every cell in the grid must contain exactly one symbol. 
+\item The first row of the grid corresponds to the input $I$.
+\item The tape head starts in the right place.
+\item The machine is in exactly one state at every step.
+\item The machine starts in the start state.
+\item The tape head is always somewhere on the tape. 
+\item Every row except the first must represent a configuration of $N(I)$ that follows from the configuration corresponding to the previous row according to some choice defined by the transition function $\delta$ of $N$.
+\item At some point the machine enters the accept state.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{$\SAT$ is $\NP$-complete}
+\begin{itemize}
+\item It helps to break down the construction of $\phi$ into parts. 
+\vspace{0.5cm}
+\item For example, we can express 1 using
+\[\phi_1=\bigwedge_{0\leq i,j\leq Cn^k}\Big((\bigvee_{\sigma\in\Sigma\cup\{:,\tvs\}}p_{i,j,\sigma})\wedge \bigwedge_{\sigma\neq\sigma'\in\Sigma\cup\{:,\tvs\}}\neg (p_{i,j,\sigma}\wedge p_{i,j,\sigma'})\Big)\]
+\item The construction of $\phi$ turns out to take $O(n^{2k})$ steps. 
+\vspace{0.5cm}
+\item  $\phi$ will be satisfiable if and only if $N(I)$ has an accepting run.
+\vspace{0.5cm}
+\item  I.e. a sequence of $\delta$ choices leading to an accept state. 
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$\SAT$ is $\NP$-complete}
+\begin{itemize}
+\item What about `short' inputs, such that the run time bound $Cn^k$ does not apply? 
+\vspace{0.5cm}
+\item There are only a finite number of these, so there's still an upper bound on the size of the `grids' representing the computations. 
+\vspace{0.5cm}
+\item The construction time of $\phi$ for these short inputs doesn't matter because the definition of $p$-time only requires polynomial bounding for `large' input lengths.
+\vspace{0.5cm}
+\item So we have shown that $A\leq_p\SAT$.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Some Final Comments}
+\begin{itemize}
+\item Using $p$-time reduction we can use $\SAT$ to show that other problems are $\NP$-complete too. 
+\vspace{0.2cm}
+\item It turns out that lots of interesting combinatorial problems are.
+\vspace{0.2cm} 
+\item Important examples include the Hamiltonian circuit and Hamiltonian path problems, the traveling salesman decision problem, the knapsack problem, and many more.
+\vspace{0.2cm}
+\item Finally, there are problems that are $\NP$-hard but not in $\NP$ (and so not $\NP$-complete). 
+\vspace{0.2cm}
+\item The halting problem is one example. 
+\vspace{0.2cm}
+\item It is obviously not in $\NP$ as it isn't even decidable, but we can show that $\SAT$ reduces to it in $p$-time. 
+\vspace{0.2cm}
+\item So by theorem \ref{T:ctrans} the halting problem is $\NP$-hard.  
+\end{itemize} 
+\end{frame}
+
+\end{document}

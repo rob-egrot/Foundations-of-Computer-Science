@@ -1,0 +1,74 @@
+\documentclass[handout]{beamer} 
+\title{ITCS 532:\\ Bonus question}
+\date{}
+\author{Rob Egrot}
+
+\usepackage{amsmath, bbold, bussproofs,graphicx}
+\usepackage{mathrsfs}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[all]{xy}
+\usepackage{multirow}
+\usepackage{tikz-cd}
+
+
+\newtheorem{proposition}[theorem]{Proposition}
+\newcommand{\bN}{\mathbb{N}}
+\newcommand{\bZ}{\mathbb{Z}}
+\newcommand{\bQ}{\mathbb{Q}}
+\newcommand{\bR}{\mathbb{R}}
+\newcommand{\bP}{\mathbb{P}}
+\newcommand{\tvs}{\textvisiblespace}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\co}{\mathbf{code}}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+\setbeamertemplate{theorems}[numbered]
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+Is $HAI$ r.e.?
+\vspace{1cm}
+\begin{itemize}
+\item No.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\begin{itemize}
+\item Consider the complement of the halting problem $\bar{H}$.
+\begin{itemize}
+\item Yes instance is pair $(T,I)$ such that $T(I)$ does not halt.
+\item No instance is $(T,I)$ such that $T(I)$ halts.
+\end{itemize}
+\vspace{1cm}
+\item $\bar{H}$ is not r.e., as otherwise $H$ would be recursive (as $H$ is r.e.).
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\begin{itemize}
+\item Given an instance $(T,I)$ of $\bar{H}$, define an instance $T_I$ of $HAI$.
+\item $T_I(J)$ erases its input then simulates $T(I)$ for $|J|$ steps.
+\item If $T(I)$ halts within $|J|$ steps then $T_I(J)$ loops.
+\item If $T(I)$ does not halt within $|J|$ steps then $T_I(J)$ halts.
+\end{itemize}
+\begin{align*}(T,I) \text{ is yes of $\bar{H}$} &\implies T(I) \text{ does not halt}\\ &\implies T_I(J) \text{ halts for all } J \\&\implies T_I \text{ is yes of $HAI$.}\end{align*}
+\begin{align*}(T,I) \text{ is no of $\bar{H}$} &\implies T(I) \text{ halts (in $n$ steps say)}\\
+&\implies T_I(J) \text{ does not halt when } |J|>n\\
+&\implies T_I \text{ is no of $HAI$}.\end{align*}
+\begin{itemize}
+\item So $\bar{H}\leq HAI$, and if $HAI$ were r.e. $\bar{H}$ would be too.
+\end{itemize}
+\end{frame}
+\end{document}

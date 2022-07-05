@@ -1,0 +1,337 @@
+\documentclass[handout]{beamer} 
+\title{ITCS 532:\\ 
+7. More on $p$-Time Reduction, and an Introduction to $\mathbf{NP}$}
+\date{}
+\author{Rob Egrot}
+
+\usepackage{amsmath, bbold, bussproofs,graphicx}
+\usepackage{mathrsfs}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[all]{xy}
+\usepackage{multirow}
+\usepackage{tikz-cd}
+
+\newtheorem{exercise}[theorem]{Exercise}{\bfseries}{\upshape}
+
+
+\newtheorem{proposition}[theorem]{Proposition}
+\newcommand{\bN}{\mathbb{N}}
+\newcommand{\bZ}{\mathbb{Z}}
+\newcommand{\bQ}{\mathbb{Q}}
+\newcommand{\bR}{\mathbb{R}}
+\newcommand{\bP}{\mathbb{P}}
+\newcommand{\tvs}{\textvisiblespace}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\co}{\mathbf{code}}
+
+\newcommand{\Po}{\mathbf{P}}
+\newcommand{\NP}{\mathbf{NP}}
+\newcommand{\SAT}{\mathsf{PSAT}}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+\setbeamertemplate{theorems}[numbered]
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+\begin{frame}
+\frametitle{The Directed Hamiltonian Circuit Problem}
+\begin{definition}[DHCP]
+The directed Hamiltonian circuit problem ($DHCP$) asks whether a given finite \emph{directed} simple graph has a Hamiltonian circuit. A Hamiltonian circuit in a directed graph is like a Hamiltonian circuit in an undirected graph except we take the edge directions into account. 
+\end{definition}
+\end{frame}
+
+\begin{frame}
+\frametitle{$HCP\leq_p DHCP$}
+\begin{theorem}
+$HCP\leq_p DHCP$, ($p$-time in $|V|+|E|$).
+\end{theorem}
+\vspace{0.3cm}
+\textbf{Proof}
+\begin{itemize}
+\item We start with a finite undirected simple graph $G=(V,E)$. 
+\vspace{0.3cm}
+\item Must construct in $p$-time a finite directed simple graph $G'$ that has a Hamiltonian circuit if and only if $G$ does. 
+\vspace{0.3cm}
+\item The vertices of $G'$ are copies of the vertices of $G$.
+\vspace{0.3cm}
+\item For every undirected edge in $G$ we add two directed edges to $G'$ between the same vertices (one in each direction). 
+\vspace{0.3cm}
+\item Construction of $G'$ is linear time ($O(m)$ if $m=|V|+|E|$). 
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$HCP\leq_p DHCP$ - Checking the Reduction}
+\begin{itemize}
+\item $G$ is a yes instance if and only if it has a Hamiltonian circuit $v_1,v_2,\ldots,v_n$. 
+\vspace{0.3cm}
+\item If $v_1,v_2,\ldots,v_n$ is a Hamiltonian circuit in $G$ then there are directed edges in $G'$ from $v_i$ to $v_{i+1}$ for all $i=1,2,\ldots,n-1$, and also from $v_n$ to $v_1$. 
+\vspace{0.3cm}
+\item So $v_1,v_2,\ldots,v_n$ is also a Hamiltonian circuit in $G'$. 
+\vspace{0.3cm}
+\item Conversely, if $v_1,v_2,\ldots,v_n$ is a Hamiltonian circuit in $G'$ then there must be edges in $G$ connecting $v_i$ and $v_{i+1}$ for all $i=1,2,\ldots,n-1$, and also an edge connecting $v_n$ and $v_1$. 
+\vspace{0.3cm}
+\item So $v_1,v_2,\ldots,v_n$ is also a Hamiltonian circuit in $G$ as required.    
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$DHCP\leq_p HCP$}
+
+\begin{theorem}
+$DHCP\leq_p HCP$ ($p$-time in $|V|+|E|$).
+\end{theorem}
+\vspace{0.3cm}
+\textbf{Proof}
+\begin{itemize}
+\item This direction is not easy. 
+\vspace{0.3cm}
+\item We start with a directed simple graph $G$ and we must construct in $p$-time an undirected  simple graph $G'$ that preserves `yes' and `no' instances. 
+\vspace{0.3cm}
+\item This is hard because it's not at all obvious how to encode the direction of edges of $G$ in $G'$. 
+\vspace{0.3cm}
+\item This is a problem because a Hamiltonian circuit in $G$ must travel along edges in the right direction. 
+\vspace{0.3cm}
+\item If we lose information about the direction of edges then Hamiltonian circuits in $G'$ may not correspond to Hamiltonian circuits in $G$. 
+\vspace{0.3cm}
+\item Fortunately, with some thought we can overcome this problem.  
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$DHCP\leq_p HCP$ - The Construction of $G'$}
+\begin{itemize}
+\item If $V$ and $E$ are the sets of vertices and edges of $G$ respectively, we define $G'=(V',E')$ as follows:
+\begin{itemize}
+\item $V'=\bigcup\{\{v,v^I,v^O\}:v\in V\}$
+\item $E'=\{\{v_0^O,v_1^I\} : (v_0,v_1)\in E\} \cup \{\{v,v^I\},\{v,v^O\}:v\in V\}$
+\end{itemize}
+
+\item So every vertex $v$ of $G$ gets two partner vertices, $v^I$ and $v^O$, that encode the direction of edges. 
+\item There are edges in $G'$ connecting $v$ to $v^O$ and $v^I$, and for a directed edge $(v,v')$ in $G$ there's an edge between $v^O$ and $v'^I$ in $G'$. E.g.
+\[\xymatrix@R=0.5em{
+\ar[dr]& & &\\
+& \bullet_{v_0}\ar[r] &\bullet_{v_1}\ar[ur]\ar[dr] & \\
+\ar[ur] & & &}\]
+becomes 
+\[\xymatrix@R=0.5em{
+\ar@{-}[dr] & & & & & & & &\\
+& \bullet_{v_0^I}\ar@{-}[r] & \bullet_{v_0}\ar@{-}[r] & \bullet_{v_0^O}\ar@{-}[r] & \bullet_{v_1^I}\ar@{-}[r] & \bullet_{v_1}\ar@{-}[r] & \bullet_{v_1^O}\ar@{-}[ur]\ar@{-}[dr]\\
+\ar@{-}[ur] & & & & & & & &}\]
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$DHCP\leq_p HCP$ - Is the Reduction Correct?}
+\begin{itemize}
+\item We need to show $G$ has an HC if and only if $G'$ does. 
+\vspace{0.5cm}
+\item If $|V|=n$ and $v_1,v_2,\ldots,v_n$ is a Hamiltonian circuit in $G$, then\vspace{0.5cm} 
+\begin{equation*}v^I_1,v_1, v^O_1, v_2^I, v_2, v_2^O,\ldots,v_n^I,v_n,v_n^O\end{equation*} 
+\vspace{0.5cm}
+is a Hamiltonian circuit in $G'$. 
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$DHCP\leq_p HCP$ - Is the Reduction Correct?}
+\begin{itemize}
+\item Conversely, if $|V|=n$ then $|V'|=3n$. 
+\item Suppose $c=u_1,u_2,\ldots,u_{3n}$ is a Hamiltonian circuit in $G'$. 
+\item Then every $v\in V$ appears somewhere in $c$. 
+\item For each $v\in V$, the edges to $v$ are $\{v,v^I\}$ and $\{v,v^O\}$. 
+\item Since $|V|=n$ and $c$ has exactly $3n$ elements, a simple counting argument tells us that, after choosing a suitable starting point, $c$ must have form either  \begin{equation*}c= v^I_1,v_1, v^O_1, v_2^I, v_2, v_2^O,\ldots,v_n^I,v_n,v_n^O,\end{equation*} or \begin{equation*}c=v^O_1,v_1, v^I_1, v_2^O, v_2, v_2^I,\ldots,v_n^O,v_n,v_n^I.\end{equation*} 
+\item So by the construction of $G'$, we get a Hamiltonian circuit in $G$ by either following $c$ forwards or backwards.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{$DHCP\leq_p HCP$ - Is the Reduction $p$-time?}
+\begin{itemize}
+\item We still have to check the reduction is $p$-time in $|V|+|E|$. 
+\vspace{0.5cm}
+\item First we constructed the vertices of $G'$. 
+\vspace{0.5cm}
+\item There are three of these for every vertex of $G$, so this step runs in $O(|V|)$ time. 
+\vspace{0.5cm}
+\item Then we added edges of form $(v^I,v)$ and $(v,v^O)$ for every vertex of $G$. Again this is $O(|V|)$.
+\vspace{0.5cm}
+\item Finally we added edges of form $(u^O,v^I)$ for every edge of $G$. This is obviously $O(|E|)$, to so the combined running time is also $O(|V|+|E|)$.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Verification vs Construction}
+\begin{itemize}
+\item Every natural number can be written as a product of prime numbers in an essentially unique way. 
+\item This is the \emph{Fundamental Theorem of Arithmetic}. 
+\item Given $n\in\bN$, an obvious question is, `what is the prime decomposition of $n$?'. 
+\item This is not, in general, an easy question to answer. 
+\item In fact, no $p$-time algorithm is known. 
+\item It \emph{is} easy to check whether a proposed factorization is correct. 
+\item This illustrates an important principle: 
+\begin{itemize}
+\item It can be easy to \emph{check} a solution, but hard to \emph{find} a solution.
+\end{itemize}
+\item In the case of the prime factorization problem, this asymmetry lies at the heart of RSA encryption.
+\item We can formalize this in terms of decision problems and Turing machines with something called a \emph{verifier}.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Verifiers}
+\begin{definition}[Verifier]
+Given a language $L$ over a finite alphabet $\Sigma$, a verifier for $L$ is a modified Turing machine $V$, where $V$ takes two inputs instead of one (consider the inputs to be separated by a special symbol), and such that
+\[x\in L\iff \text{ there is } y\in\Sigma^* \text{ such that } V(x,y) \text{ accepts}\] 
+\end{definition}
+\begin{itemize}
+\item Here $y$ is called a \emph{certificate} for $x$. 
+\item A verifier must halt for all inputs. 
+\item We say a verifier for $L$ runs in $p$-time if it runs in $p$-time with respect to the length of $x$ for all inputs $(x,y)$. 
+\item The certificate is like a proposed solution. 
+\item The verifier accepts $x$, which encodes an instance of a decision problem, if and only if there's some proposed solution $y$ that it can check is actually a solution. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Example}
+\begin{example}[Composite numbers]
+\begin{itemize}
+\item We could build a verifier to check if numbers are composite (i.e. not prime). 
+\item Here the certificates would be potential non-trivial divisors. 
+\item $V$ would run by checking whether $y$ non-trivially divides $x$ (so we exclude $y=1$ or $y=x$). 
+\item If $y\mid x$ and $y\notin\{1,x\}$ then $V(\co(x),\co(y))$ accepts. 
+\item If not it rejects.
+\end{itemize}
+\end{example} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Example}
+\begin{example}[Hamiltonian circuits]
+\begin{itemize}
+\item An instance of the Hamiltonian circuit problem is a graph $G$. 
+\item A certificate for $G$ is just a sequence $s$ of vertices (in coded form). 
+\item A verifier $V$ for the Hamiltonian  circuit problem would accept on input $(\co(G),\co(s))$ if and only if $s$ defines a Hamiltonian circuit in $G$.
+\end{itemize} 
+\end{example}
+\end{frame}
+
+\begin{frame}
+\frametitle{What's the Point of Verifiers?}
+\begin{itemize}
+\item If we don't care about run time, then verifiers don't really add anything to our toolkit for describing languages.
+\vspace{0.5cm}
+\item The next theorem demonstrates this. 
+\vspace{0.5cm}
+\item However, when we do care about run times this changes, as we will see.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Verifiers and R.E. languages}
+\begin{theorem}
+A language has a verifier if and only if it is recursively enumerable.
+\end{theorem}
+\textbf{Proof}
+\begin{itemize}
+\item Let $L$ be r.e. and let $T$ be a TM that semidecides $L$. 
+\item We construct a verifier $V_T$ so that when $V_T$ runs on $(x,\co(n))$ it computes $T(x)$ for $n$ steps ($n\in \bN$). 
+\item It accepts if $T(x)$ accepts within $n$ steps, and rejects otherwise. 
+\item It also rejects if $y$ is not $\co(n)$ for some $n$.
+\item $V_T$ is a verifier for $L$ because: 
+\begin{itemize}
+\item If $x\in L$ there is $n$ such that $T(x)$ halts in $n$ steps.
+\item So $V_T(x,\co(n))$ accepts.
+\item I.e. strings in $L$ have a certificate.
+\item $V_T(x,y)$ rejects if $y$ is not $\co(n)$ for any $n$.
+\item $V_T(x,\co(n))$ rejects if $T(x)$ does not halt within $n$ steps.
+\item I.e. strings not in $L$ have no certificate.
+\end{itemize}
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Verifiers and R.E. languages}
+\textbf{Proof Continued}
+\begin{itemize}
+\item For the converse, let $L$ have a verifier $V$. 
+\vspace{0.5cm}
+\item We construct a Turing machine $T_V$ such that $T_V(x)$ operates by generating strings $y$ in lexicographic order and computing $V(x,y)$, and halting if $V(x,y)$ accepts. 
+\vspace{0.5cm}
+\item Then $T_V$ semidecides $L$ because $x\in L$ if and only if there is $y$ such that $V(x,y)$ accepts, and, as $T_V$ computes $V(x,y)$ for every $y$ eventually, it will halt if and only if $x\in L$.  
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Complexity Classes}
+\begin{itemize}
+\item  We say that languages/decision problems are in the complexity class $\Po$ if there is a Turing machine that decides them in $p$-time. 
+\vspace{0.3cm}
+\item We say languages/decision problems are in the complexity class $\NP$ if they have a verifier that runs in $p$-time. 
+\vspace{0.3cm}
+\item The distinction between $\Po$ and $\NP$ formalizes the distinction between problems that can be efficiently solved, and problems whose solutions can be efficiently checked. 
+\vspace{0.3cm}
+\item As is often the case in complexity theory, these classes are rather coarse. 
+\vspace{0.3cm}
+\item There's a big difference between a problem with a linear time solution, and a problem with an $O(n^{10,000,000})$ solution, but we gloss over it.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Turing Machine Variants}
+\begin{itemize}
+\item  We have defined $\Po$ and $\NP$ in terms of kinds of Turing machines, and, as we have seen, there are many variant definitions we could use (e.g. multi-tape etc.). 
+\vspace{0.3cm}
+\item These are equivalent to the `standard' definition in terms of what problems they can decide. 
+\vspace{0.3cm}
+\item But could using a different model of computation affect which problems are in $\Po$ and $\NP$. 
+\vspace{0.3cm}
+\item For example, we know a problem that can be solved by a `standard' Turing machine could likely be solved in fewer steps by a Turing machine with more tapes. 
+\vspace{0.3cm}
+\item Could this speed increase be such that there is a problem solvable in $p$-time by a multi-tape machine that is not solvable in $p$-time by a `standard' machine? 
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Turing Machine Variants}
+\begin{itemize}
+\item  The answer turns out to be no.
+\vspace{0.3cm}
+\item If we carefully analyze the modeling of multi-tape Turing machines by single-tape Turing machines from a previous class, we see that the number of steps taken is polynomially bounded by the number of steps the multi-tape machine takes. 
+\vspace{0.3cm}
+\item Therefore, a problem that is $p$-time for a multi-tape machine will also be $p$-time for a single tape machine. 
+\vspace{0.3cm}
+\item The same is true for the other Turing machine variants too. 
+\vspace{0.3cm}
+\item This means our definitions for $\Po$ and $\NP$ are \emph{robust}. 
+\vspace{0.3cm}
+\item They do not depend unreasonably on the definition of `Turing machine'.     
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\frametitle{The Class $\NP$}
+\begin{itemize}   
+\item Note that $\NP$ does \emph{not} stand for \emph{non-polynomial}. 
+\vspace{1cm}
+\item This is a common but understandable misconception. 
+\vspace{1cm}
+\item $\NP$ actually stands for \emph{non-deterministic polynomial}. 
+\vspace{1cm}
+\item The name comes from an alternative definition of the class $\NP$, which we will see in the next class.
+\end{itemize} 
+\end{frame}
+
+\end{document}

@@ -1,0 +1,635 @@
+\documentclass[handout]{beamer} 
+\title{ITCS 532:\\ 1. Models of Computation}
+\date{}
+\author{Rob Egrot}
+
+\usepackage{amsmath, bbold, bussproofs,graphicx}
+\usepackage{mathrsfs}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[all]{xy}
+\usepackage{multirow}
+\usepackage{tikz-cd}
+
+
+\newtheorem{proposition}[theorem]{Proposition}
+\newcommand{\bN}{\mathbb{N}}
+\newcommand{\bZ}{\mathbb{Z}}
+\newcommand{\bQ}{\mathbb{Q}}
+\newcommand{\bR}{\mathbb{R}}
+\newcommand{\bP}{\mathbb{P}}
+\newcommand{\tvs}{\textvisiblespace}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+\setbeamertemplate{theorems}[numbered]
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{What is computation?}
+\begin{itemize}
+\item Given a set $\Gamma$ of first-order sentences, and a first-order sentence $\phi$, does $\Gamma\models \phi$?
+\vspace{0.5cm}
+\item Is there an algorithm that will always answer the above question correctly?
+\vspace{0.5cm}
+\item What exactly is an algorithm anyway?
+\vspace{0.5cm}
+\item What is computation?
+\vspace{0.5cm}
+\item How does this relate to modern computers?
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Finite State Machines}
+\begin{itemize}
+\item A \emph{finite state machine} (FSM), AKA \emph{finite automaton}, is an abstract machine.
+\vspace{0.5cm}
+\item At any moment an FSM is in one of a finite number of possible states.
+\vspace{0.5cm}
+\item The state changes in response to input.
+\vspace{0.5cm}
+\item There are only a finite number of possible inputs.
+\item E.g:
+\begin{itemize}
+\item ticket machines,
+\item vending machines,
+\item etc.
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{FSM - formal definition}
+An FSM consists of:
+\begin{enumerate}
+\item A finite set of states $Q$.
+\item A distinguished set $H\subseteq Q$. This set contains the \emph{halting} states of $M$. If the machine gets to a state in $H$ then it stops running. 
+\item A special starting state $q_0\in Q$.
+\item A finite set of possible inputs $\Sigma$ sometimes called the \emph{alphabet} of $M$.
+\item A transition function $\delta:(Q\setminus H)\times \Sigma\to Q$. This function controls state change. I.e. $\delta(q,\sigma)=r$ means \emph{if in state $q$ go to state $r$ when receiving input $\sigma$}.
+\end{enumerate} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Warning 1}
+\begin{itemize}
+\item There are other definitions for FSMs.
+\vspace{0.5cm}
+\item E.g:
+ \begin{itemize}
+\item $\delta$ may be partial. 
+\item In this case there must be a rule for dealing with undefined situations.
+\end{itemize}
+\vspace{0.5cm}
+\item Alternative definitions will be essentially equivalent to ours.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Warning 2}
+\begin{itemize}
+\item In the real world, things like ticket machines take user input in real time.
+\vspace{0.2cm}
+\item Users might walk away before completing their purchase.
+\vspace{0.2cm}
+\item The design of the machine must deal with this.
+\vspace{0.2cm}
+\item E.g. after some time of inactivity state of machine must reset.
+\vspace{0.2cm}
+\item Waiting time should not be too short or too long.
+\vspace{0.2cm}
+\item Not our problem.
+\vspace{0.2cm}
+\item We abstract away time, and treat input as a pre-determined finite sequence of events.
+\vspace{0.2cm}
+\item We don't worry about what happens after that.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Running an FSM}
+\begin{itemize}
+\item The possible inputs are represented by the symbols in $\Sigma$.
+\vspace{0.2cm}
+\item Sequences of inputs correspond to finite strings from $\Sigma$.
+\vspace{0.2cm}
+\item $\Sigma^*$ is set of all finite strings from $\Sigma$.
+\vspace{0.2cm}
+\item We think of the \emph{input} of an FSM to be a string from $\Sigma^*$.
+\vspace{0.2cm}
+\item Machine acts on each symbol in the input in turn, and changes state according to $\delta$.
+\vspace{0.2cm}
+\item The output is just the state after acting on the final symbol of the input.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Representing an FSM}
+This diagram represents an FSM that looks for the sequence $abc$ inside strings composed of letters from the alphabet $\Sigma=\{a,b,c\}$.
+\begin{center}
+\begin{tikzpicture}[scale=0.2]
+\tikzstyle{every node}+=[inner sep=0pt]
+\draw [black] (16.6,-30.5) circle (3);
+\draw (16.6,-30.5) node {$q_0$};
+\draw [black] (29.5,-30.5) circle (3);
+\draw (29.5,-30.5) node {$A$};
+\draw [black] (42.7,-30.5) circle (3);
+\draw (42.7,-30.5) node {$B$};
+\draw [black] (54.8,-30.5) circle (3);
+\draw (54.8,-30.5) node {$C$};
+\draw [black] (54.8,-30.5) circle (2.4);
+\draw [black] (15.277,-27.82) arc (234:-54:2.25);
+\draw (16.6,-23.25) node [above] {$b,c$};
+\fill [black] (17.92,-27.82) -- (18.8,-27.47) -- (17.99,-26.88);
+\draw [black] (40.024,-31.838) arc (-70.68221:-109.31779:11.861);
+\fill [black] (40.02,-31.84) -- (39.1,-31.63) -- (39.43,-32.57);
+\draw (36.1,-33.01) node [below] {$b$};
+\draw [black] (52.201,-31.974) arc (-69.26268:-110.73732:9.745);
+\fill [black] (52.2,-31.97) -- (51.28,-31.79) -- (51.63,-32.72);
+\draw (48.75,-33.11) node [below] {$c$};
+\draw [black] (32.007,-28.874) arc (114.31851:65.68149:9.938);
+\fill [black] (32.01,-28.87) -- (32.94,-29) -- (32.53,-28.09);
+\draw (36.1,-27.49) node [above] {$a$};
+\draw [black] (18.215,-27.978) arc (141.48882:38.51118:14.614);
+\fill [black] (18.21,-27.98) -- (19.1,-27.66) -- (18.32,-27.04);
+\draw (29.65,-21.96) node [above] {$b$};
+\draw [black] (30.823,-33.18) arc (54:-234:2.25);
+\draw (29.5,-37.75) node [below] {$a$};
+\fill [black] (28.18,-33.18) -- (27.3,-33.53) -- (28.11,-34.12);
+\draw [black] (26.969,-32.089) arc (-66.58879:-113.41121:9.864);
+\fill [black] (26.97,-32.09) -- (26.04,-31.95) -- (26.43,-32.87);
+\draw (23.05,-33.4) node [below] {$a$};
+\draw [black] (19.214,-29.049) arc (111.00052:68.99948:10.702);
+\fill [black] (19.21,-29.05) -- (20.14,-29.23) -- (19.78,-28.3);
+\draw (23.05,-27.84) node [above] {$c$};
+\end{tikzpicture}
+\end{center}
+If it gets to state $C$ it halts, and we have a success. Otherwise once it reaches end of input we consider it a failure. I.e., input does not contain $abc$.
+\end{frame}
+
+\begin{frame}
+\frametitle{The formal version}
+The machine on the previous slide has this formal description:
+\begin{itemize}
+\item $Q=\{q_0,A,B,C\}$.
+\item $\Sigma=\{a,b,c\}$.
+\item $\delta:\begin{cases}
+(q_0,a)\mapsto A\\
+(q_0,b)\mapsto q_0\\
+(q_0,c)\mapsto q_0\\
+(A,a)\mapsto A\\
+(A,b)\mapsto B\\
+(A,c)\mapsto q_0\\
+(B,a)\mapsto A\\
+(B,b)\mapsto q_0\\
+(B,c)\mapsto C\\
+ \end{cases}$
+\item $q_0$ (the starting state).
+\item $H=\{C\}$ (the set of halt states).
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Limitations of FSMs}
+\begin{itemize}
+\item Finite state machines are useful, but they are quite limited.
+\vspace{0.4cm}
+\item E.g: 
+\begin{itemize}
+\item No FSM to check if a graph is connected.
+\item No FSM to check if a given set of polynomial equations has a solution.
+\item No FSM to check if a number in binary is prime.
+\item Etc.
+\end{itemize}
+\vspace{0.2cm}
+\item A simpler example:
+\vspace{0.2cm}
+\item Why is there no FSM that can add two binary numbers together?
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Memory problems}
+\begin{itemize}
+\item Many of the limitations of FSMs come down to memory.
+\vspace{0.2cm}
+\item Specifically, \emph{lack} of memory.
+\vspace{0.2cm}
+\item An FSM records information only in its state.
+\vspace{0.2cm}
+\item Since it has a finite number of states, but inputs can be arbitrarily long, its ability to distinguish between inputs is limited.
+\vspace{0.2cm}
+\item Real computers also have finite memory, but the amount increases all the time.
+\vspace{0.2cm}
+\item Theoretical computer scientists often prefer to study abstract computation by assuming memory is infinite.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Turing machines}
+\begin{itemize}
+\item A Turing machine (TM) is another abstract machine.
+\item Turing defined this concept to capture the notion of an algorithm.
+\item It is similar to an FSM but it also has an infinite \emph{tape}.
+\item The TM can write on the tape, and can access things it has written before.
+\item The tape provides the TM with an infinite memory.
+\item A TM has a tape head which moves around on the tape reading symbols.
+\item During operation, the TM reads a symbol and checks its current state.
+\item Then it moves into a new state, and acts on the tape in some way, either by writing a new symbol or moving the tape head. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Turing machines - formal version $(Q,\Sigma,q_0,H,\delta)$}
+\begin{enumerate}
+\item A finite set of states $Q$.
+\item A finite alphabet $\Sigma$. Also special symbols $\tvs$ (for blank spaces) and $:$ (for start of tape). 
+\item A one way infinite tape consisting of numbered squares starting at $0$. Each square contains one symbol from $\Sigma\cup\{\tvs,:\}$. Symbol $:$ at square $0$ (only).
+\item A tape head that moves up and down the tape reading symbols. 
+\item A distinguished starting state $q_0$.
+\item A set $H\subseteq Q$ of halting states (maybe partitioned into `accept' states and `reject' states).
+\item A function $\delta: (Q\setminus H)\times\Sigma\cup\{\tvs,:\} \to Q \times (\Sigma\cup\{\tvs,\rightarrow,\leftarrow\})$.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Running a Turing machine}
+\begin{itemize}
+\item The \emph{input} of a TM is the initial state of the tape. 
+\item We assume that the starting tape always contains a finite string from $\Sigma^*$ followed by an infinite sequence of $\tvs$ symbols.
+\item A \emph{run} of a Turing machine on input $I$ is a sequence of abstract triples representing the state the machine is in, the position of the tape head, and the current state of the tape. 
+\item A run is completely determined by the input $I$ on the tape and the function $\delta$. 
+\item The \emph{output} can either be defined to be the final halting state (e.g. \emph{accept} or \emph{reject}), or the state of the tape up to the first $\tvs$ after halting.
+\item Runs don't always halt!
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Example - unary addition of 1}
+Let $\Sigma=\{1\}$. This machine adds one to a natural number represented in unary notation.
+\begin{center}
+\begin{tikzpicture}[scale=0.2]
+\tikzstyle{every node}+=[inner sep=0pt]
+\draw [black] (3.3,-34.6) circle (3);
+\draw (3.3,-34.6) node {$q_0$};
+\draw [black] (14.5,-34.6) circle (3);
+\draw (14.5,-34.6) node {$q_1$};
+\draw [black] (25,-34.6) circle (3);
+\draw (25,-34.6) node {$H$};
+\draw [black] (25,-34.6) circle (2.4);
+\draw [black] (6.3,-34.6) -- (11.5,-34.6);
+\fill [black] (11.5,-34.6) -- (10.7,-34.1) -- (10.7,-35.1);
+\draw (8.9,-35.1) node [below] {$:,\rightarrow$};
+\draw [black] (17.5,-34.6) -- (22,-34.6);
+\fill [black] (22,-34.6) -- (21.2,-34.1) -- (21.2,-35.1);
+\draw (19.75,-35.1) node [below] {$\tvs,1$};
+\draw [black] (13.177,-31.92) arc (234:-54:2.25);
+\draw (14.5,-27.35) node [above] {$1,\rightarrow$};
+\fill [black] (15.82,-31.92) -- (16.7,-31.57) -- (15.89,-30.98);
+\end{tikzpicture}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Example - unary addition of two natural numbers}
+This machine uses the alphabet $\{1,*\}$ and correct input is of form $*,a*,*b,a*b$ followed by blanks  ($a$ and $b$ are strings containing only $1$). Here $a$ and $b$ represent the numbers to be added together in unary notation. Output is the unary number that is left on the tape when the machine accepts. 
+\begin{center}
+\begin{tikzpicture}[scale=0.2]
+\tikzstyle{every node}+=[inner sep=0pt]
+\draw [black] (10.5,-19.2) circle (3);
+\draw (10.5,-19.2) node {$q_0$};
+\draw [black] (24.1,-19.2) circle (3);
+\draw (24.1,-19.2) node {$q_1$};
+\draw [black] (36,-19.3) circle (3);
+\draw (36,-19.3) node {$q_2$};
+\draw [black] (48.4,-19.3) circle (3);
+\draw (48.4,-19.3) node {$q_3$};
+\draw [black] (61.6,-19.3) circle (3);
+\draw (61.6,-19.3) node {$S$};
+\draw [black] (61.6,-19.3) circle (2.4);
+\draw [black] (13.5,-19.2) -- (21.1,-19.2);
+\fill [black] (21.1,-19.2) -- (20.3,-18.7) -- (20.3,-19.7);
+\draw (17.3,-19.7) node [below] {$:,\rightarrow$};
+\draw [black] (27.1,-19.23) -- (33,-19.27);
+\fill [black] (33,-19.27) -- (32.2,-18.77) -- (32.2,-19.77);
+\draw (30.05,-19.76) node [below] {$*,1$};
+\draw [black] (22.777,-16.52) arc (234:-54:2.25);
+\draw (24.1,-11.95) node [above] {$1,\rightarrow$};
+\fill [black] (25.42,-16.52) -- (26.3,-16.17) -- (25.49,-15.58);
+\draw [black] (34.677,-16.62) arc (234:-54:2.25);
+\draw (36,-12.05) node [above] {$1,\rightarrow$};
+\fill [black] (37.32,-16.62) -- (38.2,-16.27) -- (37.39,-15.68);
+\draw [black] (39,-19.3) -- (45.4,-19.3);
+\fill [black] (45.4,-19.3) -- (44.6,-18.8) -- (44.6,-19.8);
+\draw (42.2,-19.8) node [below] {$\tvs,\leftarrow$};
+\draw [black] (51.4,-19.3) -- (58.6,-19.3);
+\fill [black] (58.6,-19.3) -- (57.8,-18.8) -- (57.8,-19.8);
+\draw (55,-19.8) node [below] {$1,\tvs$};
+\end{tikzpicture}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Decision problems}
+\begin{itemize}
+\item A decision problem is a yes or no question. E.g:
+\begin{itemize}
+\item Given a graph $G$, is $G$ connected?
+\item Does a given string of English characters contain the word \emph{biscuits} as a substring?
+\item Is a given propositional formula satisfiable?
+\item Is a given natural number prime?
+\end{itemize}
+\vspace{0.2cm}
+\item A decision problem has a \emph{general form}, and an \emph{instance}. 
+\vspace{0.2cm}
+\item E.g. ``Is a given natural number prime?" is a general form, and a specific number $n$ is an instance of this problem.
+\vspace{0.2cm}
+\item Abstractly, a decision problem partitions its set of instances into two parts: one for `yes' and the other for `no'.
+\vspace{0.2cm}
+\item Turing machines can try to solve decision problems, but first we must write them in a language they can understand.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Working with strings}
+\begin{itemize}
+\item A (finite) alphabet $\Sigma$ is a finite set of symbols.
+\vspace{0.2cm}
+\item A string over $\Sigma$ is a sequence of characters, e.g. 01001, or the digits of $\pi$.
+\vspace{0.2cm}
+\item $|s|$ denotes the length of $s$. E.g $|01001|=5$, and the length of the string defined by the digits of $\pi$ is $\omega$ (countable infinity).
+\vspace{0.2cm}
+\item The \emph{empty string} is denoted $\epsilon$, and $|\epsilon|=0$.
+\vspace{0.2cm}
+\item We can \emph{concatenate} finite strings. Given $a$ and $b$ we write $ab$.
+\vspace{0.2cm}
+\item For all finite strings $a$ we have $\epsilon a = a$ and $a\epsilon=a$.
+\vspace{0.2cm}
+\item $\Sigma^*$ is the set of all finite strings from $\Sigma$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Formal languages}
+\begin{itemize}
+\item A \emph{formal language} over $\Sigma$ is a subset of $\Sigma^*$.
+\vspace{0.5cm}
+\item If $L$ is a formal language over $\Sigma$ then we can define the \emph{characteristic function} of $L$ by $\chi_L:\Sigma^*\to\{0,1\}$ and $\chi_L(s) = \begin{cases}1 \text{ if } s\in L \\
+0 \text{ if } s\notin L \end{cases}$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Encoding schemes}
+\begin{itemize}
+\item We want to take a decision problem and turn it into a language problem.
+\vspace{0.2cm}
+\item I.e. given a decision problem $D$ we want to associate it with a formal language $L_D$ for some alphabet $\Sigma$.
+\vspace{0.2cm}
+\item We have to choose $\Sigma$, and choose a system for writing the instances of $D$ as strings from $\Sigma^*$.
+\vspace{0.2cm}
+\item I.e. each instance $x$ should correspond to some $s_x\in\Sigma^*$. 
+\vspace{0.2cm}
+\item This system should be sensible. I.e:
+\begin{itemize}
+\item Different instances should be written as different strings.
+\item We should be able to tell if a string from $\Sigma^*$ corresponds to an instance of $D$ or not.
+\item We should be able to work out the string from the instance, and also the instance from the string.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Encoding schemes - formal version}
+\begin{definition}[encoding scheme]
+If $\Sigma$ is a finite alphabet, $D$ is a decision problem, and $I_D$ is the set of all instances of $D$, an encoding scheme for $D$ using $\Sigma$ is a function $\mathbf{code}: I_D\to \Sigma^*$ such that:
+\vspace{0.2cm}
+\begin{enumerate}
+\item if $x,y\in I_D$ and $x\neq y$ we must have $\mathbf{code}(x)\neq \mathbf{code}(y)$ (i.e. $\mathbf{code}$ is $1-1$),
+\vspace{0.2cm}
+\item it is possible to work out if a string in $\Sigma^*$ is $\mathbf{code}(x)$ for some $x\in I_D$, and
+\vspace{0.2cm} 
+\item the process for converting $x$ to $\mathbf{code}(x)$ and $\mathbf{code}(x)$ to $x$ is well defined. 
+\end{enumerate}
+\end{definition}
+\end{frame}
+
+\begin{frame}
+\frametitle{Decision problems and formal languages}
+\begin{itemize} 
+\item Any formal language $L$ defines a decision problem $D_L$.
+\vspace{0.2cm}
+\begin{itemize}
+\item ``is this word from $\Sigma^*$ in $L$?". 
+\end{itemize}
+\vspace{0.2cm}
+\item Using encoding we can turn decision problems into formal languages as follows.
+\end{itemize}
+
+\begin{definition}[$L_D$]\label{D:LD}
+Given a decision problem $D$, a finite alphabet $\Sigma$, and an encoding for $D$ using $\Sigma$, the language defined by $D$ is the set $L_D=\{\textbf{code}(x):x$ is a yes instance of $D\}$.
+\end{definition}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Decidability}
+
+\begin{definition}[Decidable]\label{D:dec}
+An (encodable) decision problem $D$ is decidable if there is a Turing machine $T$ that accepts when its input is the code of a yes instance of $D$, and rejects when its input is the code of a no instance (or not the code of an instance at all). We say $T$ decides $D$.
+\end{definition}
+\vspace{0.5cm}
+\begin{itemize}
+\item Is every decision problem that can be encoded using a finite alphabet decidable? 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Semidecidability}
+\begin{definition}[Semidecidable]\label{D:semidec}
+An (encodable) decision problem $D$ is semidecidable if there is a Turing machine $T$ that accepts when its input is the code of a yes instance of $D$, and does not halt (i.e. it runs forever) when its input is the code of a no instance (or not the code of an instance at all). We say $T$ semidecides $D$.
+\end{definition}  
+\vspace{0.5cm}
+\begin{itemize}
+\item Is every decision problem that can be encoded using a finite alphabet semidecidable?
+\vspace{0.2cm}
+\item Why is every decidable problem also semidecidable? 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Decidability and formal languages}
+\begin{definition}[recursive]
+A formal language $L$ over a finite alphabet $\Sigma$ is recursive if there is a Turing machine $T$ that takes input $x$ from $\Sigma^*$ and accepts when $x\in L$ and rejects when $x\notin L$.  
+\end{definition}
+\vspace{0.4cm}
+\begin{definition}[recursively enumerable]
+A formal language $L$ over a finite alphabet $\Sigma$ is recursively enumerable if there is a Turing machine $T$ that takes input $x$ from $\Sigma^*$ and accepts when $x\in L$ and runs forever when $x\notin L$. We often shorten \emph{recursively enumerable} to \emph{r.e.}).  
+\end{definition}
+\end{frame}
+
+\begin{frame}
+\frametitle{Some equivalences}
+By definition of $L_D$ and $D_L$ we have the following correspondences for encodable decision problems:
+\begin{align*}
+D \text{ is decidable}&\iff L_D \text{ is recursive}\\
+D_L \text{ is decidable}&\iff L \text{ is recursive}\\
+D \text{ is semidecidable}&\iff L_D \text{ is recursively enumerable}\\
+D_L \text{ is semidecidable}&\iff L \text{ is recursively enumerable}\\
+\end{align*} 
+\end{frame}
+
+\begin{frame}
+\frametitle{Example - palindromes}
+\begin{center}
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}[scale=0.2]
+\tikzstyle{every node}+=[inner sep=0pt]
+\draw [black] (39.6,-15.5) circle (3);
+\draw (39.6,-15.5) node {$q_1$};
+\draw [black] (52.3,-15.5) circle (3);
+\draw (52.3,-15.5) node {$B_0$};
+\draw [black] (65.1,-15.5) circle (3);
+\draw (65.1,-15.5) node {$B_1$};
+\draw [black] (76.4,-15.5) circle (3);
+\draw (76.4,-15.5) node {$B_2$};
+\draw [black] (26.3,-15.5) circle (3);
+\draw (26.3,-15.5) node {$A_0$};
+\draw [black] (14.2,-15.5) circle (3);
+\draw (14.2,-15.5) node {$A_1$};
+\draw [black] (3.1,-15.5) circle (3);
+\draw (3.1,-15.5) node {$A_2$};
+\draw [black] (33.7,-25.1) circle (3);
+\draw (33.7,-25.1) node {$q_0$};
+\draw [black] (39.6,-6.2) circle (3);
+\draw (39.6,-6.2) node {$R$};
+\draw [black] (39.6,-51.4) circle (3);
+\draw (39.6,-51.4) node {$F$};
+\draw [black] (39.6,-51.4) circle (2.4);
+\draw [black] (39.6,-37.7) circle (3);
+\draw (39.6,-37.7) node {$S$};
+\draw [black] (39.6,-37.7) circle (2.4);
+\draw [black] (42.6,-15.5) -- (49.3,-15.5);
+\fill [black] (49.3,-15.5) -- (48.5,-15) -- (48.5,-16);
+\draw (45.95,-15) node [above] {$b,(\tvs,\ra)$};
+\draw [black] (55.3,-15.5) -- (62.1,-15.5);
+\fill [black] (62.1,-15.5) -- (61.3,-15) -- (61.3,-16);
+\draw (58.7,-15) node [above] {$\{a,b\},\ra$};
+\draw [black] (68.1,-15.5) -- (73.4,-15.5);
+\fill [black] (73.4,-15.5) -- (72.6,-15) -- (72.6,-16);
+\draw (70.75,-15) node [above] {$\tvs,\la$};
+\draw [black] (36.6,-15.5) -- (29.3,-15.5);
+\fill [black] (29.3,-15.5) -- (30.1,-16) -- (30.1,-15);
+\draw (32.95,-15) node [above] {$a,(\tvs,\ra)$};
+\draw [black] (23.3,-15.5) -- (17.2,-15.5);
+\fill [black] (17.2,-15.5) -- (18,-16) -- (18,-15);
+\draw (20.25,-15) node [above] {$\{a,b\},\ra$};
+\draw [black] (11.2,-15.5) -- (6.1,-15.5);
+\fill [black] (6.1,-15.5) -- (6.9,-16) -- (6.9,-15);
+\draw (8.65,-15) node [above] {$\tvs,\la$};
+\draw [black] (35.27,-22.54) -- (38.03,-18.06);
+\fill [black] (38.03,-18.06) -- (37.18,-18.48) -- (38.04,-19);
+\draw (36.02,-19.02) node [left] {$:,\ra$};
+\draw [black] (5.614,-13.863) arc (121.48441:87.10459:54.115);
+\fill [black] (36.61,-5.97) -- (35.84,-5.43) -- (35.79,-6.42);
+\draw (17.18,-6.76) node [above] {$a,(\tvs,\la)$};
+\draw [black] (42.592,-5.984) arc (92.59079:59.04384:55.895);
+\fill [black] (42.59,-5.98) -- (43.41,-6.45) -- (43.37,-5.45);
+\draw (62.17,-6.81) node [above] {$b,(\tvs,\la)$};
+\draw [black] (66.423,-18.18) arc (54:-234:2.25);
+\draw (65.1,-22.75) node [below] {$\{a,b\},\ra$};
+\fill [black] (63.78,-18.18) -- (62.9,-18.53) -- (63.71,-19.12);
+\draw [black] (15.523,-18.18) arc (54:-234:2.25);
+\draw (14.2,-22.75) node [below] {$\{a,b\},\ra$};
+\fill [black] (12.88,-18.18) -- (12,-18.53) -- (12.81,-19.12);
+\draw [black] (38.277,-3.52) arc (234:-54:2.25);
+\draw (39.6,1.05) node [above] {$\{a,b\},\la$};
+\fill [black] (40.92,-3.52) -- (41.8,-3.17) -- (40.99,-2.58);
+\draw [black] (39.6,-9.2) -- (39.6,-12.5);
+\fill [black] (39.6,-12.5) -- (40.1,-11.7) -- (39.1,-11.7);
+\draw (40.1,-10.85) node [right] {$\tvs,\ra$};
+\draw [black] (36.714,-50.583) arc (-107.5108:-161.53957:50.565);
+\fill [black] (36.71,-50.58) -- (36.1,-49.87) -- (35.8,-50.82);
+\draw (14.7,-38.89) node [below] {$b,b$};
+\draw [black] (75.335,-18.304) arc (-22.28191:-69.13662:57.811);
+\fill [black] (42.43,-50.4) -- (43.36,-50.59) -- (43,-49.65);
+\draw (63.87,-38.25) node [below] {$a,a$};
+\draw [black] (36.842,-36.526) arc (-117.36188:-180.78654:20.004);
+\fill [black] (36.84,-36.53) -- (36.36,-35.71) -- (35.9,-36.6);
+\draw (28.23,-30.3) node [left] {$\tvs,\tvs$};
+\draw [black] (52.825,-18.45) arc (5.36879:-64.91413:18.221);
+\fill [black] (42.41,-36.66) -- (43.35,-36.77) -- (42.92,-35.86);
+\draw (51.16,-30.43) node [right] {$\tvs,\tvs$};
+\draw [black] (40.643,-18.311) arc (17.27171:-17.27171:27.917);
+\fill [black] (40.64,-34.89) -- (41.36,-34.27) -- (40.4,-33.98);
+\draw (42.4,-26.6) node [right] {$\tvs,\tvs$};
+\end{tikzpicture}
+}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Pushdown automata}
+\begin{itemize}
+\item Turing machines are strictly more powerful than FSMs due to them effectively having infinite memory. 
+\item There are things we can do with a TM that can not be done by an FSM. 
+\item Is there a model of computation between FSMs and TMs? 
+\item It turns out the answer is yes. 
+\item A \emph{pushdown automaton} is another abstract computation system based on FSMs. 
+\item A pushdown automaton also has access to infinite memory in the form of a stack. 
+\item It turns out that this makes them strictly more powerful than FSMs, but strictly less powerful than Turing machines. 
+\item Pushdown automata with two stacks turn out to be equivalent to Turing machines. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Computation and language}
+\begin{definition}[Recognize]
+Let $M$ be an abstract machine capable of acting on input from $\Sigma^*$ for a finite alphabet $\Sigma$, and let $L\subseteq\Sigma^*$ be a language. We say $M$ recognizes $L$ if $M$ accepts on input $x$ if and only if $x\in L$. 
+\end{definition}
+\begin{itemize}
+\item Every recursively enumerable language has a Turing machine that recognizes it (this is just the definition of r.e.). 
+\item Moreover, every Turing machine $T$ defines a recursively enumerable language (just take the set of all $x$ such that $T(x)$ halts). So...
+\end{itemize}
+\begin{theorem}
+The class of recursively enumerable languages is precisely the class of languages that can be recognized by a Turing machine.
+\end{theorem}
+\end{frame}
+
+\begin{frame}
+\frametitle{The Chomsky heirarchy}
+\begin{center}
+\begin{tabular}{ |c| c | }
+ \hline \textbf{language} & \textbf{model of computation} \\ \hline
+ recursively enumerable & Turing machines \\ \hline 
+ context-sensitive & linear bounded automata \\ \hline
+ context-free & pushdown automata \\ \hline
+ regular & finite state machines\\ \hline
+\end{tabular}
+\end{center}
+\begin{itemize}
+\item The Chomsky hierarchy of formal languages and their associated models of computation. 
+\item Models of computation are arranged in order of power. 
+\item On this course we are mainly interested in Turing machines. 
+\item Note that it is possible to refine this hierarchy by adding extra classes, and this may result in something that is not linearly ordered.
+\end{itemize}
+\end{frame}
+
+
+
+
+
+\end{document}
