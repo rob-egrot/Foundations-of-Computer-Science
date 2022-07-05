@@ -1,0 +1,91 @@
+\documentclass{article}
+
+\usepackage{amsmath, mathrsfs, amssymb, stmaryrd, cancel, relsize,tikz,amsthm,comment,enumerate}
+
+\theoremstyle{definition}
+\newtheorem{Q}{Question}
+
+\newcommand{\tvs}{\textvisiblespace}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\co}{\mathbf{code}}
+
+
+\title{ITCS 532 Foundations of Computer Science\\
+Week 4 - Undecidable Problems (Homework)}
+\author{Rob Egrot}
+\date{}
+%\includecomment{comment}
+
+% uncomment below to allow file to build as a stand-alone document
+% this is part of a hack to allow the same file to be input twice without mixing up labels when building main document
+%\renewcommand{\prefix}{}
+
+\begin{document}
+\maketitle
+
+\begin{Q}
+Let $L_1$ and $L_2$ be disjoint r.e. languages. Suppose $L_1\cup L_2$ is recursive. Prove that $L_1$ and $L_2$ are both recursive.
+\end{Q}
+\begin{comment}
+\textbf{Solution}\\
+We will describe an algorithm for deciding $L_1$. 
+\begin{enumerate}
+\item Given a string $x$ we can decide if $x\in L_1\cup L_2$, as this language is recursive.
+\item If $x\notin L_1\cup L_2$ then $x\notin L_1$, so reject.
+\item If $x\in L_1\cup L_2$ then it must be in either $L_1\setminus L_2$, or $L_2\setminus L_1$. Use dovetailing to simultaneously run the algorithms that semidecide $L_1$ and $L_2$ on $x$.
+\item If $x\in L_1$ then accept.
+\item If $x\in L_2$ then reject.
+\end{enumerate}
+We can decide $L_2$ similarly.
+\end{comment}
+
+\begin{Q}\label{\prefix Q:100}
+Let $D$ be the decision problem ``Given a Turing machine $T$ and input $I$, does $T(I)$ halt within 100 steps?". Then there is an associated formal language \[L_D=\{\co(T,I):T \text{ halts on } I \text{ within 100 steps}\}\]
+Which of the following is true (give reasons)?
+\begin{enumerate}
+\item[i)] $L_D$ is recursive.
+\item[ii)] $L_D$ is r.e but not recursive.
+\item[iii)] $L_D$ is not r.e.
+\end{enumerate}
+\end{Q}
+\begin{comment}
+\textbf{Solution}\\
+$L_D$ is recursive. To decide $L_D$ we use a Turing machine that, given input $\co(T,I)$ simulates $T(I)$, and also maintains a counter track of the number of steps that have been simulated. If this simulation halts before the counter reaches 100 then the input is accepted. If it does not (or if the input is not in the correct format), then it rejects.
+\end{comment}
+
+\begin{Q}\label{\prefix Q:D}
+Let $D$ be the decision problem ``Given a Turing machine $T$, does $T$ halt on every input $I$ within 100 steps?". What is the formal language $L_D$ associated with $D$?
+\end{Q}
+\begin{comment}
+\textbf{Solution}\\
+$\{\co(T): T$ is a Turing machine and $T(I)$ halts within 100 steps for all $I\}$.
+\end{comment}
+
+\begin{Q}
+With $D$ as in question \ref{Q:D} prove that $L_D$ is recursive. 
+\end{Q}
+\begin{comment}
+\textbf{Solution}\\
+Note that $T(I)$ halts for all $I$ within 100 steps if and only if $T(I)$ halts for all $I$ of length $\leq 100$ within 100 steps, as $T$ can never read past the first 100 symbols within 100 steps. Now, the number of strings over a finite alphabet whose length is $\leq 100$ is finite, so we can check $T(I)$ for each such string $I$ using the algorithm from question \ref{Q:100}. If the answer is no for any $I$ we reject $\co(T)$, and if the answer is yes for all $I$ we accept $\co(T)$.
+\end{comment}
+
+\begin{Q}
+Let $HAI$ be the decision problem ``Given $T$ does $T$ halt for all inputs?". Then an instance of $HAI$ is a Turing machine $T$. \begin{enumerate}
+\item[a)] What is an instance of the Halting Problem?
+\item[b)] If $M$ is a Turing machine and $I$ is an input for $M$ let $M_I$ be a machine that first erases its input then simulates $M(I)$. Show that $M(I)$ halts if and only if $M_I(J)$ halts for all inputs $J$, and $M(I)$ runs forever if and only if $M_I(J)$ runs forever for all $J$.
+\item[c)] Prove that the Halting Problem reduces to $HAI$.
+\item[d)] What does this tell us about the decidability of $HAI$?
+\end{enumerate} 
+\end{Q}
+\begin{comment}
+\textbf{Solution}\\
+\begin{enumerate}[a)]
+\item A pair $(M,I)$ where $M$ is a Turing machine and $I$ is a finite string over its alphabet.
+\item By definition $M(I)$ halts if and only if $M_I(J)$ halts for all $J$. So the contrapositive statement says that $M(I)$ runs forever if and only if $M_I(J)$ runs forever for some $J$. But $M_I(J)$ does the same thing for all $J$, so $M(I)$ runs forever if and only if $M_I(J)$ runs forever for all $J$.
+\item Given an instance $(M,I)$ of HP we construct an instance $M_I$ of HAI as described. We have just proved that $(M,I)$ is a yes instance of HP if and only if $M_I$ is a yes instance of HAI.
+\item As $HP\leq HAI$, and $HP$ is undecidable, it follows that $HAI$ is undecidable.
+\end{enumerate}
+\end{comment}
+
+\end{document}

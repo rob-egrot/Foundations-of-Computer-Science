@@ -1,0 +1,99 @@
+\documentclass{article}
+
+\usepackage{amsmath, mathrsfs, amssymb, stmaryrd, cancel, relsize,tikz,amsthm,comment}
+
+\theoremstyle{definition}
+\newtheorem{Q}{Question}
+
+\newcommand{\tvs}{\textvisiblespace}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\co}{\mathbf{code}}
+
+
+\title{ITCS 532 Foundations of Computer Science\\
+Week 5 - The Entscheidungsproblem (Homework)}
+\author{Rob Egrot}
+\date{}
+%\includecomment{comment}
+\begin{document}
+\maketitle
+
+\begin{Q}
+Let $L=\{\co(T):T$ is a TM and $T(I)$ halts within $100$ steps for some $I\}$. Prove that $L$ is recursive.
+\end{Q}
+\begin{comment}
+\textbf{Solution} \\
+Only strings whose length is at most 100 are relevant. We use a Turing machine that simulates $T(I)$ on every string whose length is at most 100, while simultaneously keeping track of the number of simulated steps. If $T(I)$ halts within 100 steps then we accept. If $T(I)$ does not halt within 100 steps we move onto the next string. If we get through all the strings then we reject. 
+\end{comment}
+
+\begin{Q}
+Let $L=\{\co(T): T$ is a TM and $T(I)$ halts within $4\times$length$(I)$ steps for some input $I\}$. Prove $L$ is r.e. then prove that $L$ is not recursive by reducing the empty tape halting problem to the decision problem corresponding to $L$. 
+\end{Q}
+\begin{comment}
+\textbf{Solution} \\
+To show that $L$ is r.e. we use the fact that the set $\Sigma^*$ is r.e. and assume we can generate all strings in order. We use the following algorithm:
+\begin{enumerate}
+\item Generate the first string $I$.
+\item Calculate the length of $I$.
+\item Simulate $T(I)$ while tracking the number of simulated steps.
+\item If $T(I)$ halts within $4\times$length$(I)$ steps then accept.
+\item If $T(I)$ does not halt within $4\times$length$(I)$ steps then generate next $I$ and go to step 2. 
+\end{enumerate}
+An instance of ETHP is a Turing machine $T$. Given $T$, or, more precisely, given $\co(T)$, we want an algorithm that constructs a Turing machine $T'$ (more precisely, $\co(T')$), such that $T(\epsilon)$ halts if and only if $T'(J)$ halts within $4\times$length$(J)$ steps for some $J\in \Sigma^*$. 
+
+Define $T'$ to be the machine that acts as follows:
+\begin{enumerate}
+\item Erase the input.
+\item Move tape head back to first space. 
+\item Do what $T$ would do.
+\end{enumerate}
+Then: 
+\begin{align*}
+T\text{ is a yes instance of ETHP} \implies& T(\epsilon)\text{ halts} \\ 
+\implies& \text{There is $n$ such that $T(\epsilon)$ halts in $n$ steps}\\
+\implies& T'(J)\text{ halts within $4\times$length$(J)$ when length$(J)=n+2$}\\
+\implies& T' \text{ is a yes instance of }D_L.
+\end{align*}
+Note the importance of the number 4. $T'$ operates by first erasing the input $J$. This takes $2|J|+1$ steps (2 steps for each character of $J$, and an extra step for the tape head to move onto the first blank). $T'$ then moves the tape head back to the start space. This takes $|J|+1$ steps. Since by assumption $T(\epsilon)$ halts in $n$ steps, we know $T'(J)$ halts within $2(n+2)+1 + (n+2)+1 + n = 4n+8=4(n+2)=4|J|$ steps. 
+
+Conversely, if $T(\epsilon)$ does not halt then $T'(J)$ does not halt for any $J$, and so $T'$ is trivially a no instance of $D_L$.    
+\end{comment}
+
+\begin{Q}
+Let $\mathscr{L}=\{0,s\}$ where $0$ is a constant, $s$ is a unary function. Let $\Gamma$ contain the following sentences:
+\begin{enumerate}
+\item $\forall n \neg (0 =s(n))$.
+\item $\forall m\forall n((s(m)=s(n))\ra (m =n))$.
+\end{enumerate}
+I.e. $\Gamma$ contains the axioms of Peano arithmetic that deal only with successor and zero. We want to define $+$ to be the standard addition function. Starting with $+(x,0)=x$ use recursion with the $s$ function to define $+(x,y)$ for general $x$ and $y$. HINT: Assuming that we have defined $+(x,y)$, we want to define $+(x,s(y))$ using our definition of $+(x,y)$ and the successor function $s$. 
+\end{Q}
+\begin{comment}
+\textbf{Solution} 
+\begin{itemize}
+\item $+(x,0) = x$.
+\item $+(x,s(y)) = s(+(x,y))$.
+\end{itemize}
+\end{comment}
+
+\begin{Q}
+A function $f:\mathbb{N}\times\mathbb{N}\to\mathbb{N}$ is \emph{computable} if there is a Turing machine $M$ and an encoding system $\co:\mathbb{N}\to \{0,1\}^*$ such that \[M(\co(m,n))=\co(f(m,n))\text{ for all }m,n\in \mathbb{N}.\] 
+In other words, if there's a Turing machine that `does the same thing' as the function. Define the function $b:\mathbb{N}\times\mathbb{N}\to\mathbb{N}$ by $b(m,n)$ is the maximum number of steps a Turing machine with $m$ states defined over the alphabet $\{0,1\}$ can take in a halting computation on an input of length $n$. I.e. $b(m,n)=k$ if there is a Turing machine $T$ with $m$ states and an input $I$ with length $n$ such that $T(I)$ halts in $k$ steps, and for all Turing machines $M$ with $m$ states and for all inputs $J$ with length $n$, either $M(J)$ does not halt or it halts in $k$ or fewer steps. 
+
+Prove that $b$ is not computable. The easiest way to do this is to show that if $b$ were computable we could use the TM that computes it to decide the halting problem. 
+ 
+\end{Q}
+\begin{comment}
+\textbf{Solution} \\
+Suppose $b$ is computable. Consider the following algorithm on input $\co(T,I)$:
+\begin{enumerate}
+\item Count the number of states of $T$. Call this $x$.
+\item Calculate the length of $I$. Call this $y$.
+\item Compute $b(x,y)$.
+\item Simulate $T(I)$ while keeping track of number of simulated computation steps. If $T(I)$ halts within $b(x,y)$ steps then accept. If simulation passes $b(x,y)$ steps then we can reject, as we know $T(I)$ cannot halt after this point, by definition of $b$.
+\end{enumerate}
+
+The above algorithm would solve the halting problem, which we know is impossible, so $b$ cannot be computable.
+\end{comment}
+
+\end{document}
