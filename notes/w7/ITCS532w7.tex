@@ -1,0 +1,130 @@
+\documentclass{article}
+
+\usepackage{amsmath, mathrsfs, amssymb, stmaryrd, cancel, relsize,tikz,amsthm}
+\usepackage[all]{xy}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]{\bfseries}{\itshape}
+\newtheorem{proposition}[theorem]{Proposition}{\bfseries}{\itshape}
+\newtheorem{definition}[theorem]{Definition}{\bfseries}{\upshape}
+\newtheorem{lemma}[theorem]{Lemma}{\bfseries}{\upshape}
+\newtheorem{corollary}[theorem]{Corollary}{\bfseries}{\upshape}
+\newtheorem{exercise}[theorem]{Exercise}{\bfseries}{\upshape}
+
+\theoremstyle{definition}
+\newtheorem{example}[theorem]{Example}{\bfseries}{\upshape}
+
+\newcommand{\tvs}{\textvisiblespace}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\co}{\mathbf{code}}
+\newcommand{\Po}{\mathbf{P}}
+\newcommand{\NP}{\mathbf{NP}}
+\newcommand{\bbN}{\mathbb{N}}
+\newcommand{\SAT}{\mathsf{PSAT}}
+
+
+
+\title{ITCS 532 Foundations of Computer Science\\
+Class 7 - More on $p$-time reduction, and an introduction to $\NP$}
+\author{Rob Egrot}
+\date{}
+
+\begin{document}
+\maketitle
+\subsection{Example - The Directed Hamiltonian Circuit Problem}
+\begin{definition}[DHCP]
+The directed Hamiltonian circuit problem ($DHCP$) asks whether a given finite \emph{directed} simple graph has a Hamiltonian circuit. A Hamiltonian circuit in a directed graph is like a Hamiltonian circuit in an undirected graph except we take the edge directions into account. 
+\end{definition}
+
+\begin{theorem}
+$HCP\leq_p DHCP$, where the reduction is $p$-time when considered as a function of the number of edges plus the number of vertices of the instance graph $G$.
+\end{theorem}
+\begin{proof}
+This is an easy proof. We start with a finite undirected simple graph $G=(V,E)$ and we want to construct a finite directed simple graph $G'$ in $p$-time such that $G$ has a Hamiltonian circuit if and only if $G'$ does. In our construction the vertices of $G'$ are copies of the vertices of $G$, and for every undirected edge in $G$ we add two directed edges to $G'$ between the same vertices (one in each direction). $G'$ has the same vertices as $G$, and for every edge of $G$ we add two to $G'$. Assuming adding vertices and edges takes constant time this means that the construction of $G'$ is actually linear time ($O(m)$ if $m=|V|+|E|$). 
+
+We must check the construction of $G'$ preserves `yes' and `no' instances correctly. $G$ is a yes instance if and only if it has a Hamiltonian circuit $v_1,v_2,\ldots,v_n$. By construction of $G'$, if $v_1,v_2,\ldots,v_n$ is a Hamiltonian circuit in $G$ then there are directed edges in $G'$ from $v_i$ to $v_{i+1}$ for all $i=1,2,\ldots,n-1$, and also from $v_n$ to $v_1$. So $v_1,v_2,\ldots,v_n$ is also a Hamiltonian circuit in $G'$. Conversely, if $v_1,v_2,\ldots,v_n$ is a Hamiltonian circuit in $G'$ then there must be edges in $G$ connecting $v_i$ and $v_{i+1}$ for all $i=1,2,\ldots,n-1$, and also an edge connecting $v_n$ and $v_1$. So $v_1,v_2,\ldots,v_n$ is also a Hamiltonian circuit in $G$ as required.     
+\end{proof}
+
+\begin{theorem}
+$DHCP\leq_p HCP$, where the reduction is $p$-time when considered as a function of the number of vertices plus the number of edges of the instance graph $G$.
+\end{theorem}
+\begin{proof}
+This direction is not easy. We start with a directed simple graph $G$ and we must construct an undirected  simple graph $G'$ in $p$-time that preserves `yes' and `no' instances. This is hard because it's not at all obvious how to encode the direction of edges of $G$ in $G'$. This is a problem because a Hamiltonian circuit in $G$ must travel along edges in the right direction. If we lose information about the direction of edges then Hamiltonian circuits in $G'$ may not correspond to Hamiltonian circuits in $G$. Fortunately, with some thought we can overcome this problem.
+
+If $V$ and $E$ are the sets of vertices and edges of $G$ respectively, we define $G'=(V',E')$ as follows:
+\begin{itemize}
+\item $V'=\bigcup\{\{v,v^I,v^O\}:v\in V\}$
+\item $E'=\{\{v_0^O,v_1^I\} : (v_0,v_1)\in E\} \cup \{\{v,v^I\},\{v,v^O\}:v\in V\}$
+\end{itemize}
+
+The idea is that every vertex $v$ of $G$ gets two partner vertices, $v^I$ and $v^O$, that will be used to encode the direction of edges. There are edges in $G'$ connecting $v$ to $v^O$ and $v^I$, and wherever there's a directed edge $(v,v')$ between vertices in $G$ there's an edge between $v^O$ and $v'^I$ in $G'$. E.g.
+\[\xymatrix{
+\ar[dr]& & &\\
+& \bullet_{v_0}\ar[r] &\bullet_{v_1}\ar[ur]\ar[dr] & \\
+\ar[ur] & & &}\]
+becomes 
+\[\xymatrix{
+\ar@{-}[dr] & & & & & & & &\\
+& \bullet_{v_0^I}\ar@{-}[r] & \bullet_{v_0}\ar@{-}[r] & \bullet_{v_0^O}\ar@{-}[r] & \bullet_{v_1^I}\ar@{-}[r] & \bullet_{v_1}\ar@{-}[r] & \bullet_{v_1^O}\ar@{-}[ur]\ar@{-}[dr]\\
+\ar@{-}[ur] & & & & & & & &}\]
+
+We need to show that $G$ has a Hamiltonian circuit if and only if $G'$ does. If $|V|=n$ and $v_1,v_2,\ldots,v_n$ is a Hamiltonian circuit in $G$, then 
+\begin{equation*}v^I_1,v_1, v^O_1, v_2^I, v_2, v_2^O,\ldots,v_n^I,v_n,v_n^O\end{equation*} is a Hamiltonian circuit in $G'$. 
+
+Conversely, if $|V|=n$ then $|V'|=3n$. Suppose $c=u_1,u_2,\ldots,u_{3n}$ is a Hamiltonian circuit in $G'$. Then every $v\in V$ appears somewhere in $c$. But for each $v\in V$, the only edges connecting $v$ are $\{v,v^I\}$ and $\{v,v^O\}$. Since $|V|=n$ and $c$ has exactly $3n$ elements, a simple counting argument tells us that, after choosing a suitable starting point, $c$ must have form \[v^{x_0}_1,v_1, v^{y_0}_1, v_2^{x_1}, v_2, v_2^{y_1},\ldots,v_n^{x_n},v_n,v_n^{y_n}\] for some labeling of the vertices in $V$. Here for all $i\in\{1,\ldots,n\}$ we have $x_i,y_i\in\{I,O\}$.
+
+Now, since there are no edges in $G'$ of the form $(v_i^I,v_j^I)$, or $(v_i^O,v_j^O)$ we must have either  \begin{equation*}c= v^I_1,v_1, v^O_1, v_2^I, v_2, v_2^O,\ldots,v_n^I,v_n,v_n^O,\end{equation*} or \begin{equation*}c=v^O_1,v_1, v^I_1, v_2^O, v_2, v_2^I,\ldots,v_n^O,v_n,v_n^I.\end{equation*} So by the construction of $G'$, we get a Hamiltonian circuit in $G$ by either following $c$ forwards or backwards.
+
+We still have to check the reduction is $p$-time in the number of edges of $G$. First we constructed the vertices of $G'$. There are three of these for every vertex of $G$, so this step runs in $O(|V|)$ time. Then we added edges of form $(v^I,v)$ and $(v,v^O)$ for every vertex of $G$. Again this is $O(|V|)$. Finally we added edges of form $(u^O,v^I)$ for every edge of $G$. This is obviously $O(|E|)$, to so the combined running time is also $O(|V|+|E|)$, which is $p$-time as claimed.
+\end{proof}
+
+\subsection{Verifiers}
+It is a well known basic fact of number theory that every natural number can be written as a product of prime numbers in an essentially unique way (that is, it's unique except for the order we write the primes). This fact is known as the \emph{Fundamental Theorem of Arithmetic}. So, given a natural number $n$, an obvious question is, `what is the prime decomposition of $n$?'. This is not, in general, an easy question to answer. In fact, no $p$-time algorithm is known. On the other hand, it \emph{is} easy to check whether the product of a given collection of prime numbers is equal to a particular number (just multiply them all together and look at the result). This illustrates an important principle: For some questions it's hard to find a solution, but it's easy to check whether a proposed solution is correct. In the case of the prime factorization problem, this asymmetry lies at the heart of RSA encryption.
+
+We can formalize this in terms of decision problems and Turing machines with something called a \emph{verifier}.
+
+\begin{definition}[Verifier]
+Given a language $L$ over a finite alphabet $\Sigma$, a verifier for $L$ is a modified Turing machine $V$, where $V$ takes two inputs instead of one (consider the inputs to be separated by a special symbol), and such that
+\[x\in L\iff \text{ there is } y\in\Sigma^* \text{ such that } V(x,y) \text{ accepts}\]
+Here $y$ is called a \emph{certificate} for $x$. A verifier must halt for all inputs. We say a verifier for $L$ runs in $p$-time if it runs in $p$-time with respect to the length of $x$ for all inputs $(x,y)$.  
+\end{definition}
+The certificate is like a proposed solution. The verifier accepts $x$, which encodes an instance of a decision problem, if and only if there's some proposed solution $y$ that it can check is actually a solution. 
+
+\begin{example}[Composite numbers]
+We could build a verifier to check if numbers are composite (i.e. not prime). Here the certificates would be potential non-trivial divisors. $V$ would run by checking whether $y$ non-trivially divides $x$ (so we exclude $y=1$ or $y=x$). If so $V(\co(x),\co(y))$ would accept, and if not it would reject.
+\end{example}  
+
+\begin{example}[Hamiltonian circuits]
+An instance of the Hamiltonian circuit problem is a graph $G$. A certificate for $G$ is just a sequence $s$ of vertices (in coded form). A verifier $V$ for the Hamiltonian  circuit problem would accept on input $(\co(G),\co(s))$ if and only if $s$ defines a Hamiltonian circuit in $G$. 
+\end{example}
+
+If we don't care about run time, then verifiers don't really add anything to our toolkit for describing languages, as the theorem below demonstrates. However, when we do care about run times this changes, as we see in the following sections.
+\begin{theorem}
+A language has a verifier if and only if it is recursively enumerable.
+\end{theorem}
+\begin{proof}
+First let $L$ be an r.e. language and let $T$ be a TM that semidecides $L$. We construct a verifier $V_T$ so that when $V_T$ runs on $(x,\co(n))$, where $n$ is a natural number, it follows the computation $T(x)$ for $n$ steps. It accepts if $T(x)$ accepts within $n$ steps, and rejects otherwise. $V_T$ is clearly a verifier for $L$ because 
+\begin{align*}
+V_T(x,\co(n))\text{ halts for some }n & \iff T(x)\text{ halts within $n$ steps for some $n$}\\
+&\iff T(x) \text{ halts}\\
+& \iff x\in L,
+\end{align*}
+and, moreover, $V_T(x,y)$ halts for all $(x,y)$, assuming it rejects if $y$ is not the code of a natural number. 
+
+For the converse, let $L$ have a verifier $V$. We construct a Turing machine $T_V$ such that $T_V(x)$ operates by generating strings $y$ in lexicographic order and computing $V(x,y)$, and halting if $V(x,y)$ accepts. Then $T_V$ semidecides $L$ because $x\in L$ if and only if there is $y$ such that $V(x,y)$ accepts, and, as $T_V$ computes $V(x,y)$ for every $y$ eventually, it will halt if and only if $x\in L$.   
+\end{proof}
+
+
+\subsection{Complexity Classes}
+\begin{definition}
+We say that languages/decision problems are in the complexity class $\Po$ if there is a Turing machine that decides them in $p$-time. We say languages/decision problems are in the complexity class $\NP$ if they have a verifier that runs in $p$-time.
+\end{definition}
+
+The distinction between $\Po$ and $\NP$ formalizes the distinction between problems that can be efficiently solved, and problems whose solutions can be efficiently checked. As is often the case in complexity theory, these classes are rather coarse. There's a big difference between a problem with a linear time solution, and a problem with an $O(n^{10,000,000})$ solution, but we gloss over it.
+
+Now, we have defined $\Po$ and $\NP$ in terms of kinds of Turing machines, and, as we have seen, there are many variant definitions we could use (e.g. multi-tape etc.). We have seen already that these are equivalent to the `standard' definition in terms of what problems they can decide, but this does not prove that using a different model of computation could not affect which problems are in $\Po$ and $\NP$. For example, we know a problem that can be solved by a `standard' Turing machine could likely be solved in fewer steps by a Turing machine with more tapes. Could this speed increase be such that there is a problem solvable in $p$-time by a multi-tape machine that is not solvable in $p$-time by a `standard' machine? 
+
+The answer turns out to be no, because, if we carefully analyze the modeling of multi-tape Turing machines by single-tape Turing machines from Section \ref{S:TMvar}, we see that, while the single-tape machine takes more steps, the number of steps taken is polynomially bounded by the number of steps the multi-tape machine takes. Therefore, a problem that is $p$-time for a multi-tape machine will also be $p$-time for a single tape machine. The same is true for the other Turing machine variants too. This means our definitions for $\Po$ and $\NP$ are \emph{robust} in the sense that they do not depend unreasonably on the definition of `Turing machine'.     
+
+Note that $\NP$ does \emph{not} stand for \emph{non-polynomial}. This is a common but understandable misconception. $\NP$ actually stands for \emph{non-deterministic polynomial}. The name comes from an alternative definition of the class $\NP$, which we explain in the next section.
+\end{document}

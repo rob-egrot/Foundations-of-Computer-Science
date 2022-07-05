@@ -1,0 +1,166 @@
+\documentclass{article}
+
+\usepackage{amsmath, mathrsfs, amssymb,comment, stmaryrd, cancel, relsize,tikz,amsthm,standalone,enumerate}
+\usepackage{hyperref}
+\usepackage[all]{xy}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[subsection]{\bfseries}{\itshape}
+\newtheorem{proposition}[theorem]{Proposition}{\bfseries}{\itshape}
+\newtheorem{definition}[theorem]{Definition}{\bfseries}{\upshape}
+\newtheorem{lemma}[theorem]{Lemma}{\bfseries}{\upshape}
+\newtheorem{example}[theorem]{Example}{\bfseries}{\upshape}
+\newtheorem{corollary}[theorem]{Corollary}{\bfseries}{\upshape}
+\newtheorem{exercise}[theorem]{Exercise}{\bfseries}{\upshape}
+
+\newtheorem{Q}{Exercise}[section]{\bfseries}{\upshape}
+%\newtheorem{Q}{Question}
+
+\newcommand{\tvs}{\textvisiblespace}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\co}{\mathbf{code}}
+\newcommand{\Po}{\mathbf{P}}
+\newcommand{\NP}{\mathbf{NP}}
+\newcommand{\bbN}{\mathbb{N}}
+\newcommand{\bbR}{\mathbb{R}}
+\newcommand{\SAT}{\mathsf{PSAT}}
+
+\newcommand*{\prefix}{}
+
+
+\title{ITCS 532 Foundations of Computer Science}
+\author{Rob Egrot}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\section{Preface}
+These notes are supposed to be a reasonably self-contained introduction to the theory of computation and computational complexity. The focus is on Turing machines, and one of the aims of the course is to present Alan Turing's negative solution of the Entscheidungsproblem - the proof that there can be no algorithm that will determine whether an arbitrary first-order sentence is a consequence of an arbitrary first-order theory. In order to get to this point we must make rigorous the concepts of `algorithm' and `decision problem', which is where Turing machines come in. 
+
+The end of the course introduces some ideas from computational complexity theory. In particular we develop the ideas necessary to define the $\Po$ vs $\NP$ problem, though we don't go any further than that. The text is written with the assumption that the reader has some knowledge of other models of computation, e.g. finite state machines, but this is not necessary to understand the material. 
+
+The document contains some `exercises' interspersed with the text. These are intended to be easy, so long as the material up to that point has been understood. The idea is that if you understand the preceding material the answer should be fairly obvious, so if this is not the case then you should go back and review what you have read before proceeding further. Each section also has a subsection dedicated to exercises. These are more substantial and require effort beyond just understanding the basic ideas from the main text.   
+\section{Models of Computation}
+\input{../w1/ITCS532w1}
+\subsection{Exercises}
+\input{../../homework/w1/ITCS 532 hw1}
+\newpage
+
+\section{Turing Machine Variants}\label{S:TMvar}
+\input{../w2/ITCS532w2}
+\subsection{Exercises}
+\input{../../homework/w2/ITCS 532 hw2}
+\newpage
+
+\section{Universal Turing Machines}
+\input{../w3/ITCS532w3}
+\subsection{Exercises}
+\input{../../homework/w3/ITCS 532 hw3}
+\newpage
+
+\section{Undecidable Problems}\label{S:und}
+\input{../w4/ITCS532w4}
+\subsection{Exercises}
+\input{../../homework/w4/ITCS 532 hw4}
+\newpage
+
+\section{The Entscheidungsproblem}
+\input{../w5/ITCS532w5}
+\subsection{Exercises}
+\input{../../homework/w5/ITCS 532 hw5}
+\newpage
+
+\section{Tractability and $p$-Time Reduction}
+\input{../w6/ITCS532w6}
+\subsection{Exercises}
+\input{../../homework/w6/ITCS 532 hw6}
+\newpage
+
+\section{More $p$-Time Reduction, and an Introduction to $\NP$}
+\input{../w7/ITCS532w7}
+\subsection{Exercises}
+\input{../../homework/w7/ITCS 532 hw7}
+\newpage
+
+\section{$\NP$-Completeness}
+\input{../w8/ITCS532w8}
+\subsection{Exercises}
+\input{../../homework/w8/ITCS 532 hw8}
+\newpage
+\section{Further reading}
+A classic introduction can be found in \cite{Sip12}. Unfortunately I don't think this is freely distributed by the author. There's also \cite{Sav98}, which the author generously makes available under a creative commons license.  Also, if you want to draw Turing machine diagrams, this tool is great, especially if you use LaTeX: \url{http://madebyevan.com/fsm/}. 
+
+
+\newpage
+\includecomment{comment}
+% Add label padding to avoid reference conflicts
+\renewcommand*{\prefix}{PAD}
+
+% This is a bit of a hack as I wanted to number exercise solutions with the same numbers as the original exercises, but the internal referncing does not like this at all.
+% My solution is to make the subsections invisible with *. This throws a lot of warnings but the document produced is functional.
+% Removing * causes these subsections to appear in the ToC (the warnings remain), but the link does not function correctly. 
+
+\section{Appendix - Solutions to exercises}
+\setcounter{section}{2}
+\section*{Models of Computation}
+\input{../../homework/w1/ITCS 532 hw1}
+
+\section*{Turing Machine Variants}
+\setcounter{section}{3}
+\setcounter{Q}{0}
+\input{../../homework/w2/ITCS 532 hw2}
+
+\section*{Universal Turing Machines}
+\setcounter{section}{4}
+\setcounter{Q}{0}
+\input{../../homework/w3/ITCS 532 hw3}
+
+\section*{Undecidable Problems}
+\setcounter{section}{5}
+\setcounter{Q}{0}
+\input{../../homework/w4/ITCS 532 hw4}
+
+\section*{The Entscheidungsproblem}
+\setcounter{section}{6}
+\setcounter{Q}{0}
+\input{../../homework/w5/ITCS 532 hw5}
+
+\section*{Tractability and $p$-Time Reduction}
+\setcounter{section}{7}
+\setcounter{Q}{0}
+\input{../../homework/w6/ITCS 532 hw6}
+
+\section*{More $p$-Time Reduction, and an Introduction to $\NP$}
+\setcounter{section}{8}
+\setcounter{Q}{0}
+\input{../../homework/w7/ITCS 532 hw7}
+\section*{$\NP$-Completeness}
+\setcounter{Q}{0}
+\input{../../homework/w8/ITCS 532 hw8}
+
+
+\begin{thebibliography}{1}
+
+\bibitem{Sav98}
+John Savage.
+\newblock {\em Models of Computation}.
+\newblock 1998.
+\newblock URL: \url{http://cs.brown.edu/people/jsavage/book/}.
+
+\bibitem{Sip12}
+Michael Sipser.
+\newblock {\em Introduction to the Theory of Compuation}.
+\newblock 3rd edition, 2012.
+
+\bibitem{SmithGod}
+Peter Smith.
+\newblock G\"odel without (too many) tears.
+\newblock URL: \url{https://www.logicmatters.net/igt/godel-without-tears/}.
+
+\end{thebibliography}
+
+\bibliographystyle{plainurl}
+
+\end{document}
