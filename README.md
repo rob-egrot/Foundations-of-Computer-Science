@@ -10,3 +10,5 @@ The main file can be found in the notes/combined folder. This includes exercies 
 comment out or delete the relevant part at the end of the .tex file.
 
 Stand-alone exercise sheets can also be created, but to get this to work properly you may need to make some edits (e.g. some references will need to be manually edited).
+
+If you change the folder structure or file names then you'll need to edit the main document if you want it to build properly.
